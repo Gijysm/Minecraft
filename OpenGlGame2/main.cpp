@@ -49,7 +49,7 @@ int main()
     }
 
     // Load Texture
-    Texture* texture = load_texture("C:\\Users\\popka\\Downloads\\857b4fb07782360778fceb455a39fff2.jpg");
+    Texture* texture = load_texture("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\ATLAS\\14w25a_textures_0.png");
     if (texture == nullptr)
     {
         std::cerr << "Failed to load texture" << std::endl;
@@ -67,7 +67,7 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Camera* camera = new Camera(vec3(0,0,1), radians(90.0f));
+    Camera* camera = new Camera(vec3(0,0,20), radians(90.0f));
 
     mat4 model(1.0f);
 

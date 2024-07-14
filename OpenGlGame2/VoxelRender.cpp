@@ -23,79 +23,82 @@ VoxelRender::~VoxelRender()
 Mesh* VoxelRender::render(Chunk* chunk)
 {
 	size_t index = 0;
-	for (int y = 0; y < _CHUNK_H; y++)
-	{
-		for (int z = 0; z < _CHUNK_D; z++)
-		{
-			for (int x = 0; x < _CHUNK_W; x++)
-			{
+	for (int y = 0; y < _CHUNK_H; y++) {
+		for (int z = 0; z < _CHUNK_D; z++) {
+			for (int x = 0; x < _CHUNK_W; x++) {
 				voxel vox = chunk->voxels[(y * _CHUNK_D + z) * _CHUNK_W + x];
-				unsigned id= vox.id;
-				if (!id)
-				{
-					continue;
+				unsigned int id = vox.id;
 
+				if (!id) {
+					continue;
 				}
-				float Light;
-				if (!IS_BLOCKED(x, y + 1, z))
-				{
-					Light = 0.8;
-					VERTEX(index, x - 0.5, y + 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x - 0.5, y + 0.5, z + 0.5, 1, 1, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-					VERTEX(index, x - 0.5, y + 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z - 0.5, 0, 0, Light);
-				}												
-				if (!IS_BLOCKED(x, y - 1, z))					
-				{	
-					Light = 0.2;
-					VERTEX(index, x - 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y - 0.5, z + 0.5, 0, 1, Light);
-					VERTEX(index, x - 0.5, y - 0.5, z + 0.5, 1, 1, Light);
-					VERTEX(index, x - 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y - 0.5, z - 0.5, 0, 0, Light);
-					VERTEX(index, x + 0.5, y - 0.5, z + 0.5, 0, 1, Light);
-				}												 
-				if (!IS_BLOCKED(x + 1, y, z))					 
-				{	
-					Light = 0.75;
-					VERTEX(index, x + 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-					VERTEX(index, x + 0.5, y - 0.5, z + 0.5, 1, 1, Light);
-					VERTEX(index, x + 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z - 0.5, 0, 0, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-				}												 
-				if (!IS_BLOCKED(x - 1, y, z))					 
-				{	
-					Light = 0.75;
-					VERTEX(index, x - 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x - 0.5, y - 0.5, z + 0.5, 1, 1, Light);
-					VERTEX(index, x - 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-					VERTEX(index, x - 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x - 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-					VERTEX(index, x - 0.5, y + 0.5, z - 0.5, 0, 0, Light);
-				}												
-				if (!IS_BLOCKED(x, y, z + 1))					
-				{	
-					Light = 0.5;
-					VERTEX(index, x - 0.5, y - 0.5, z + 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-					VERTEX(index, x - 0.5, y + 0.5, z + 0.5, 1, 1, Light);
-					VERTEX(index, x - 0.5, y - 0.5, z + 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y - 0.5, z + 0.5, 0, 0, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z + 0.5, 0, 1, Light);
-				}												 
-				if (!IS_BLOCKED(x, y, z - 1))					 
-				{		
-					Light = 0.5;
-					VERTEX(index, x - 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x - 0.5, y + 0.5, z - 0.5, 1, 1, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z - 0.5, 0, 1, Light);
-					VERTEX(index, x - 0.5, y - 0.5, z - 0.5, 1, 0, Light);
-					VERTEX(index, x + 0.5, y + 0.5, z - 0.5, 0, 1, Light);
-					VERTEX(index, x + 0.5, y - 0.5, z - 0.5, 0, 0, Light);
+
+				float l;
+				float uvsize = 1.0f / 32.0f;
+				float u = (id % 16) * uvsize;
+				float v = 1 - ((1 + id / 16) / uvsize);
+
+				if (!IS_BLOCKED(x, y + 1, z)) {
+					l = 1.0f;
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u + uvsize, v, l);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u + uvsize, v + uvsize, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u, v + uvsize, l);
+
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u + uvsize, v, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u, v + uvsize, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u, v, l);
+				}
+				if (!IS_BLOCKED(x, y - 1, z)) {
+					l = 0.75f;
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u, v, l);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u + uvsize, v + uvsize, l);
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u, v + uvsize, l);
+
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u, v, l);
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u + uvsize, v, l);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u + uvsize, v + uvsize, l);
+				}
+
+				if (!IS_BLOCKED(x + 1, y, z)) {
+					l = 0.95f;
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u + uvsize, v, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u + uvsize, v + uvsize, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u, v + uvsize, l);
+
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u + uvsize, v, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u, v + uvsize, l);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u, v, l);
+				}
+				if (!IS_BLOCKED(x - 1, y, z)) {
+					l = 0.85f;
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u, v, l);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u + uvsize, v + uvsize, l);
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u, v + uvsize, l);
+
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u, v, l);
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u + uvsize, v, l);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u + uvsize, v + uvsize, l);
+				}
+
+				if (!IS_BLOCKED(x, y, z + 1)) {
+					l = 0.9f;
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u, v, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u + uvsize, v + uvsize, l);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u, v + uvsize, l);
+
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u, v, l);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u + uvsize, v, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u + uvsize, v + uvsize, l);
+				}
+				if (!IS_BLOCKED(x, y, z - 1)) {
+					l = 0.8f;
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u + uvsize, v, l);
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u + uvsize, v + uvsize, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u, v + uvsize, l);
+
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u + uvsize, v, l);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u, v + uvsize, l);
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u, v, l);
 				}
 			}
 		}
