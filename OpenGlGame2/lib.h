@@ -10,6 +10,7 @@
 #include <glfw3.h>
 #include <glm.hpp>
 #include<ext.hpp>
+#include <math.h>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include<vec2.hpp>

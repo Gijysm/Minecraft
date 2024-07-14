@@ -1,7 +1,11 @@
 #include "lib.h"
 #include "Window.h"
 #include "Camera.h"
+#include "Mesh.h"
+#include "Voxel.h"
+#include "Chunk.h"
 #include "Event.h"
+#include "VoxelRender.h"
 #include "Shader.h"
 #include "Png_loading.h"
 #include "Texture.h"
@@ -23,7 +27,7 @@ float vertices[] = {
 };
 
 
-
+int artts[] = { 3, 2, 0 };
 
 
 
@@ -53,21 +57,13 @@ int main()
         Window::Terminate();
         return 0;
     }
+    VoxelRender renderer(1024 * 1024);
+    Chunk* chunk = new Chunk();
+    Mesh* mesh = renderer.render(chunk);
 
-    // Set up vertex data and buffers
-    GLuint VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
 
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(0 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -125,22 +121,20 @@ int main()
         }
         camera->getRotation() = mat4(1.0f);
         camera->rotate(CamX,CamY, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader->use();
         shader->uniform_mat4("model", model);
         shader->uniform_mat4("projview", camera->getProjection() * camera->getView());
         texture->bind();
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6); // змінено з 3 на 6
-        glBindVertexArray(0);
+        mesh->draw(GL_TRIANGLES);
         Window::swapBuffers();
         Event::PullEvents();
     }
 
     delete shader;
     delete texture;
-    glDeleteBuffers(1, &VBO);
-    glDeleteVertexArrays(1, &VAO);
+    delete mesh;
+    delete chunk;
     Window::Terminate();
 
 }

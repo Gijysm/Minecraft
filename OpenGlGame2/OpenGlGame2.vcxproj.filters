@@ -25,6 +25,15 @@
     <Filter Include="Graphics\Loaders">
       <UniqueIdentifier>{16a1c31e-8038-49e2-9fbe-c73d6eda3e17}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Mesh">
+      <UniqueIdentifier>{fc9e1348-8412-47a2-b468-f52db81db067}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mesh\Voxel">
+      <UniqueIdentifier>{41bdb74f-1a9f-424f-b0a9-f019a47e7f5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mesh\Chunk">
+      <UniqueIdentifier>{053428a0-14b3-4624-a7d7-ac8b84b0746e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -42,17 +51,26 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Png_loading.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Voxel.cpp">
+      <Filter>Mesh\Voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>Mesh\Chunk</Filter>
+    </ClCompile>
+    <ClCompile Include="Png_loading.cpp">
+      <Filter>Graphics\Loaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VoxelRender.cpp">
+      <Filter>Mesh\Voxel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="lib.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Window.h">
       <Filter>Window</Filter>
     </ClInclude>
@@ -62,17 +80,32 @@
     <ClInclude Include="Shader.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Defines.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Png_loading.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Voxel.h">
+      <Filter>Mesh\Voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Mesh\Chunk</Filter>
+    </ClInclude>
+    <ClInclude Include="Png_loading.h">
+      <Filter>Graphics\Loaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelRender.h">
+      <Filter>Mesh\Voxel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
