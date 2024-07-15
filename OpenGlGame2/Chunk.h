@@ -8,8 +8,9 @@ class voxel;
 class Chunk
 {
 public:
+	int x, y, z;
 	voxel* voxels;
-	Chunk();
+	Chunk(int xpos, int ypos, int zpos);
 	~Chunk();
 	void initializeVoxels();
 };

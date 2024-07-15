@@ -1,7 +1,6 @@
 #include "Png_loading.h"
 #include "Texture.h"
 
-
 GLuint png_load(const char* file, int* width, int* height, int* nrComponents) {
     // Завантаження зображення за допомогою SOIL2
     unsigned char* image = SOIL_load_image(file, width, height, nrComponents, SOIL_LOAD_RGBA);
@@ -22,6 +21,9 @@ GLuint png_load(const char* file, int* width, int* height, int* nrComponents) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Генерація mipmaps
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     // Звільнення пам'яті зображення
     SOIL_free_image_data(image);

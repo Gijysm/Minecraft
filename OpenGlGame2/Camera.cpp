@@ -6,6 +6,10 @@ fov(fov), rotation(1)
 	updateVectors();
 }
 
+Camera::~Camera()
+{
+}
+
 mat4 Camera::getProjection()
 {
 	float aspect = (float)Window::getWidth() / (float)Window::getHeight();

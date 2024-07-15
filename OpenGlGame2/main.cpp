@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Voxel.h"
 #include "Chunk.h"
+#include "Chunks.h"
 #include "Event.h"
 #include "VoxelRender.h"
 #include "Shader.h"
@@ -57,10 +58,11 @@ int main()
         Window::Terminate();
         return 0;
     }
-    VoxelRender renderer(1024 * 1024);
-    Chunk* chunk = new Chunk();
-    Mesh* mesh = renderer.render(chunk);
-
+    Chunks* chunks = new Chunks(8, 1, 8);
+    Mesh** meshes = new Mesh * [chunks->Getvolume()];
+    for (size_t i = 0; i < chunks->Getvolume(); i++)
+        meshes[i] = nullptr;
+    VoxelRender renderer(1024 * 1024 * 8);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -69,10 +71,7 @@ int main()
 
     Camera* camera = new Camera(vec3(0,0,20), radians(90.0f));
 
-    mat4 model(1.0f);
-
-    model = translate(model, vec3(0.5, 0, 0));
-    float lastTime = glfwGetTime();
+     float lastTime = glfwGetTime();
     float currentTime = 0;
     float delta = 0;
     float CamX = 0, CamY = 0;
@@ -96,19 +95,19 @@ int main()
         }
         if (Event::isKeyPressed(GLFW_KEY_W))
         {
-            camera->getPosition() += camera->getFont() * 1.6f * delta;
+            camera->getPosition() += camera->getFont() * 4.6f * delta;
         }
         if(Event::isKeyPressed(GLFW_KEY_S))
 		{
-			camera->getPosition() -=  camera->getFont() * 1.6f * delta;
+			camera->getPosition() -=  camera->getFont() * 4.6f * delta;
 		}
         if (Event::isKeyPressed(GLFW_KEY_A))
         {
-            camera->getPosition() -= camera->getRight() * 1.6f * delta;
+            camera->getPosition() -= camera->getRight() * 4.6f * delta;
         }
         if (Event::isKeyPressed(GLFW_KEY_D))
         {
-            camera->getPosition() += camera->getRight() * 1.6f * delta;
+            camera->getPosition() += camera->getRight() * 4.6f * delta;
         }
         if (Event::isKeyPressed(GLFW_KEY_ESCAPE))
         {
@@ -121,20 +120,61 @@ int main()
         }
         camera->getRotation() = mat4(1.0f);
         camera->rotate(CamX,CamY, 0);
+        Chunk* closes[27];
+
+        for (size_t i = 0; i < chunks->Getvolume(); i++)
+        {
+            Chunk* chunk = chunks->GetChunk(i);
+            if (meshes[i] != nullptr)
+                delete meshes[i];
+            for (int j = 0; j < 27; j++)
+            {
+                closes[j] = 0;
+            }
+            for (size_t j = 0; j < chunks->Getvolume(); j++)
+            {
+                Chunk* other = chunks->GetChunk(j);
+                int dx = other->x - chunk->x;
+                int dy = other->y - chunk->y;
+                int dz = other->z - chunk->z;
+                if (abs(dx) > 1 || abs(dy) > 1 || abs(dz) > 1)
+                {
+                    continue;
+                }
+                dx += 1;
+                dy += 1;
+                dz += 1;
+                closes[(dy * 3 + dz) * 3 + dx] = other;
+            }
+            Mesh* mesh = renderer.render(chunk, (const Chunk**)closes);
+            meshes[i] = mesh;
+            
+
+        }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader->use();
-        shader->uniform_mat4("model", model);
         shader->uniform_mat4("projview", camera->getProjection() * camera->getView());
         texture->bind();
-        mesh->draw(GL_TRIANGLES);
+        mat4 model;
+        for (size_t i = 0; i < chunks->Getvolume(); i++)
+        {
+            Chunk* chunk = chunks->GetChunk(i);
+            Mesh* mesh = meshes[i];
+            model = glm::translate(mat4(1.0f), vec3(chunk->x * _CHUNK_W, chunk->y * _CHUNK_H, chunk->z * _CHUNK_D));
+            shader->uniform_mat4("model", model);
+            mesh->draw(GL_TRIANGLES);
+        }
         Window::swapBuffers();
         Event::PullEvents();
     }
-
+    for (size_t i = 0; i < chunks->Getvolume(); i++)
+    {
+        delete meshes[i];
+    }
+    delete [] meshes;
     delete shader;
     delete texture;
-    delete mesh;
-    delete chunk;
+    delete chunks;
     Window::Terminate();
 
 }

@@ -31,7 +31,10 @@
     <Filter Include="Mesh\Voxel">
       <UniqueIdentifier>{41bdb74f-1a9f-424f-b0a9-f019a47e7f5a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Mesh\Chunk">
+    <Filter Include="Mesh\Chunks">
+      <UniqueIdentifier>{96a06c3d-d0f8-48ed-a6a0-f68c1808f1b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mesh\Chunks\Chunk">
       <UniqueIdentifier>{053428a0-14b3-4624-a7d7-ac8b84b0746e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -61,13 +64,16 @@
       <Filter>Mesh\Voxel</Filter>
     </ClCompile>
     <ClCompile Include="Chunk.cpp">
-      <Filter>Mesh\Chunk</Filter>
+      <Filter>Mesh\Chunks\Chunk</Filter>
     </ClCompile>
     <ClCompile Include="Png_loading.cpp">
       <Filter>Graphics\Loaders</Filter>
     </ClCompile>
     <ClCompile Include="VoxelRender.cpp">
       <Filter>Mesh\Voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunks.cpp">
+      <Filter>Mesh\Chunks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -93,7 +99,7 @@
       <Filter>Mesh\Voxel</Filter>
     </ClInclude>
     <ClInclude Include="Chunk.h">
-      <Filter>Mesh\Chunk</Filter>
+      <Filter>Mesh\Chunks\Chunk</Filter>
     </ClInclude>
     <ClInclude Include="Png_loading.h">
       <Filter>Graphics\Loaders</Filter>
@@ -106,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="VoxelRender.h">
       <Filter>Mesh\Voxel</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunks.h">
+      <Filter>Mesh\Chunks</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

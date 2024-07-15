@@ -16,7 +16,7 @@ public:
 	VoxelRender(size_t capacity);
 	~VoxelRender();
 
-	Mesh* render(Chunk* chunk);
+	Mesh* render(Chunk* chunk, const Chunk** chunks);
 };
 
 #endif // !VOXEL_RENDER_H
