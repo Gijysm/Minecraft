@@ -10,6 +10,7 @@ class Chunk
 public:
 	int x, y, z;
 	voxel* voxels;
+	bool modifier ;
 	Chunk(int xpos, int ypos, int zpos);
 	~Chunk();
 	void initializeVoxels();

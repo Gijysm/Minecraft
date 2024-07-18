@@ -75,6 +75,9 @@
     <ClCompile Include="Chunks.cpp">
       <Filter>Mesh\Chunks</Filter>
     </ClCompile>
+    <ClCompile Include="LineBranch.cpp">
+      <Filter>Mesh\Voxel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="Chunks.h">
       <Filter>Mesh\Chunks</Filter>
+    </ClInclude>
+    <ClInclude Include="LineBranch.h">
+      <Filter>Mesh\Voxel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
