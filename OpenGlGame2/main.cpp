@@ -8,6 +8,7 @@
 #include "Event.h"
 #include "VoxelRender.h"
 #include "Shader.h"
+#include "Files.h"
 #include "LineBranch.h"
 #include "Png_loading.h"
 #include "Texture.h"
@@ -64,7 +65,7 @@ int main()
         Window::Terminate();
         return 0;
     }
-    Chunks* chunks = new Chunks(5, 1, 5);
+    Chunks* chunks = new Chunks(16, 8, 16);
     size_t chunkVolume = chunks->Getvolume();
     Mesh** meshes = new Mesh * [chunkVolume];
     for (size_t i = 0; i < chunkVolume; i++)
@@ -97,6 +98,23 @@ int main()
         if (Event::isKeyPressed(GLFW_KEY_TAB))
         {
             Event::toogleCursor();
+        }
+        if (Event::isKeyPressed(GLFW_KEY_F1))
+        {
+            unsigned char* buffer = new unsigned char[chunkVolume * _CHUNK_SIZE];
+            chunks->write(buffer);
+            write_to_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (const char*) buffer, chunkVolume * _CHUNK_SIZE);
+            cout << "Saved in: " << (chunkVolume * _CHUNK_SIZE ) << endl;
+
+            delete[] buffer;
+        }
+        if (Event::isKeyPressed(GLFW_KEY_F2))
+        {
+            unsigned char* buffer = new unsigned char[chunkVolume * _CHUNK_SIZE];
+            chunks->read(buffer);
+            read_from_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (char*)buffer, chunkVolume * _CHUNK_SIZE);
+
+            delete[] buffer;
         }
         if (Event::isKeyPressed(GLFW_KEY_W))
         {
@@ -191,7 +209,6 @@ int main()
         Lineshader->use();
         Lineshader->uniform_mat4("projview", camera->getProjection() * camera->getView());
         glLineWidth(2);
-        branch->AddLine(0, 0, 0, 0, 10, 0, 1, 0, 0, 1);
         branch->render();
         Window::swapBuffers();
         Event::PullEvents();

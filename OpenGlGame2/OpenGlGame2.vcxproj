@@ -137,6 +137,8 @@
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Chunks.cpp" />
     <ClCompile Include="Event.cpp" />
+    <ClCompile Include="Files.cpp" />
+    <ClCompile Include="LightMap.cpp" />
     <ClCompile Include="LineBranch.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -153,15 +155,21 @@
     <ClInclude Include="Chunks.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Event.h" />
+    <ClInclude Include="Files.h" />
     <ClInclude Include="lib.h" />
+    <ClInclude Include="LightMap.h" />
     <ClInclude Include="LineBranch.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Png_loading.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Voxel.h" />
     <ClInclude Include="VoxelRender.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="OpenGlGame2.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

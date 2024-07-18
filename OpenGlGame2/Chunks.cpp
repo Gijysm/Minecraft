@@ -181,3 +181,31 @@ void Chunks::Set(int x, int y, int z, int id) {
 	if (ly == _CHUNK_H - 1 && (chunk = GetChunk(cx, cy + 1, cz))) chunk->modifier = true;
 	if (lz == _CHUNK_D - 1 && (chunk = GetChunk(cx, cy, cz + 1))) chunk->modifier = true;
 }
+
+void Chunks::write(unsigned char* info)
+{
+	size_t index = 0;
+	for (int i = 0; i < volume; i++) {
+		Chunk* chunk = chunks[i];
+
+		for (size_t j = 0; j < _CHUNK_SIZE; j++, index++)
+		{
+			info[index] = chunk->voxels[j].id;
+		}
+	}
+}
+
+void Chunks::read(unsigned char* source)
+{
+	size_t index = 0;
+	for (int i = 0; i < volume; i++) {
+		Chunk* chunk = chunks[i];
+
+		for (size_t j = 0; j < _CHUNK_SIZE; j++, index++)
+		{
+			source[index] = chunk->voxels[j].id;
+			chunk->voxels[j].id = source[index];
+		}
+		chunk->modifier = true;
+	}
+}

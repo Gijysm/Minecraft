@@ -37,6 +37,12 @@
     <Filter Include="Mesh\Chunks\Chunk">
       <UniqueIdentifier>{053428a0-14b3-4624-a7d7-ac8b84b0746e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Files">
+      <UniqueIdentifier>{bdcb1818-7520-46c8-a053-aafae52c15c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Light">
+      <UniqueIdentifier>{23f67ea9-1bd4-451b-a8e2-594196e09ceb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -77,6 +83,12 @@
     </ClCompile>
     <ClCompile Include="LineBranch.cpp">
       <Filter>Mesh\Voxel</Filter>
+    </ClCompile>
+    <ClCompile Include="Files.cpp">
+      <Filter>Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LightMap.cpp">
+      <Filter>Light</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,5 +134,19 @@
     <ClInclude Include="LineBranch.h">
       <Filter>Mesh\Voxel</Filter>
     </ClInclude>
+    <ClInclude Include="Files.h">
+      <Filter>Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightMap.h">
+      <Filter>Light</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="OpenGlGame2.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
