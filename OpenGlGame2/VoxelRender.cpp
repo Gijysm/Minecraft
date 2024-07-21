@@ -5,19 +5,21 @@
 #define IS_IN(X,Y,Z) ((X) >= 0 && (X) < _CHUNK_W && (Y) >= 0 && (Y) < _CHUNK_H && (Z) >= 0 && (Z) < _CHUNK_D)
 #define VOXEL(X, Y, Z) (GET_CHUNK(X,Y,Z)->voxels[(LOCAL(Y, _CHUNK_H) * _CHUNK_D + LOCAL(Z, _CHUNK_D)) * _CHUNK_W + LOCAL(X, _CHUNK_W)])
 #define LOCAL(X, SIZE) ((X) >= (SIZE) ? ((X) - (SIZE)) : LOCAL_NEG(X, SIZE))
-#define LIGHT(X,Y,Z,CHANNEL) (IS_CHUNK(X,Y,Z) ? GET_CHUNK(X,Y,Z)->lightmap->Get(LOCAL(LOCAL(X, _CHUNK_W), LOCAL(Y, _CHUNK_H), LOCAL(Z, _CHUNK_D), (CHANNEL)) : 0)
 #define GET_CHUNK(X, Y, Z) (chunks[((CDVI(Y, _CHUNK_H) + 1) * 3 + CDVI(Z, _CHUNK_D) + 1) * 3 + CDVI(X, _CHUNK_W) + 1])
 #define IS_CHUNK(X,Y,Z) (GET_CHUNK(X,Y,Z) != nullptr)
 #define IS_BLOCKED(X, Y, Z) ((!IS_CHUNK(X, Y, Z)) || VOXEL(X, Y, Z).id)
-#define VERTEX(INDEX, X, Y, Z, U, V, L, R,G,B,S) \
+#define LIGHT(X,Y,Z,CHANNEL) (IS_CHUNK(X, Y, Z) ? GET_CHUNK(X, Y, Z)->lightmap->get(LOCAL(X, _CHUNK_W), LOCAL(Y, _CHUNK_H), LOCAL(Z, _CHUNK_D), (CHANNEL)) : 0)
+#define VERTEX(INDEX, X, Y, Z, U, V, R,G,B,S) \
 buffer[INDEX + 0] = X; \
 buffer[INDEX + 1] = Y; \
 buffer[INDEX + 2] = Z; \
 buffer[INDEX + 3] = U; \
 buffer[INDEX + 4] = V; \
-buffer[INDEX + 5] = L; \
+buffer[INDEX + 5] = R; \
+buffer[INDEX + 6] = G; \
+buffer[INDEX + 7] = B; \
+buffer[INDEX + 8] = S; \
 INDEX += _VERTEX_SIZE;
-
 VoxelRender::VoxelRender(size_t capacity) : capacity(capacity)
 {
 buffer = new float[capacity * _VERTEX_SIZE * 6];
@@ -48,122 +50,209 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 				float v1 = ((1 + id / 16) / uvsize);
 				float v2 = v1 + uvsize;
 
-				float a, b, c, d, e, f, g, h;
-
-				a = b = c = d = e = f = g = h = 0;
 
 				if (!IS_BLOCKED(x, y + 1, z)) {
 					l = 1.0f;
+					float lr = LIGHT(x, y + 1, z, 0) / 15.0f;
+					float lg = LIGHT(x, y + 1, z, 1) / 15.0f;
+					float lb = LIGHT(x, y + 1, z, 2) / 15.0f;
+					float ls = LIGHT(x, y + 1, z, 3) / 15.0f;
 
-						a = IS_BLOCKED(x + 1, y + 1, z) * aoFactor;
-						b = IS_BLOCKED(x - 1, y + 1, z) * aoFactor;
-						c = IS_BLOCKED(x, y + 1, z + 1) * aoFactor;
-						d = IS_BLOCKED(x, y + 1, z - 1) * aoFactor;
-						e = IS_BLOCKED(x + 1, y + 1, z + 1) * aoFactor;
-						f = IS_BLOCKED(x - 1, y + 1, z + 1) * aoFactor;
-						g = IS_BLOCKED(x + 1, y + 1, z - 1) * aoFactor;
-						h = IS_BLOCKED(x - 1, y + 1, z - 1) * aoFactor;
-					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - d - a - h));
-					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, l * (1.0f - a - b - g));
+					float lr0 = (LIGHT(x - 1, y + 1, z, 0) + lr * 30 + LIGHT(x - 1, y + 1, z - 1, 0) + LIGHT(x, y + 1, z - 1, 0)) / 5.0f / 15.0f;
+					float lr1 = (LIGHT(x - 1, y + 1, z, 0) + lr * 30 + LIGHT(x - 1, y + 1, z + 1, 0) + LIGHT(x, y + 1, z + 1, 0)) / 5.0f / 15.0f;
+					float lr2 = (LIGHT(x + 1, y + 1, z, 0) + lr * 30 + LIGHT(x + 1, y + 1, z + 1, 0) + LIGHT(x, y + 1, z + 1, 0)) / 5.0f / 15.0f;
+					float lr3 = (LIGHT(x + 1, y + 1, z, 0) + lr * 30 + LIGHT(x + 1, y + 1, z - 1, 0) + LIGHT(x, y + 1, z - 1, 0)) / 5.0f / 15.0f;
 
-					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, l * (1.0f - a - b - g));
-					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v1, l * (1.0f - b - c - f));
+					float lg0 = (LIGHT(x - 1, y + 1, z, 1) + lg * 30 + LIGHT(x - 1, y + 1, z - 1, 1) + LIGHT(x, y + 1, z - 1, 1)) / 5.0f / 15.0f;
+					float lg1 = (LIGHT(x - 1, y + 1, z, 1) + lg * 30 + LIGHT(x - 1, y + 1, z + 1, 1) + LIGHT(x, y + 1, z + 1, 1)) / 5.0f / 15.0f;
+					float lg2 = (LIGHT(x + 1, y + 1, z, 1) + lg * 30 + LIGHT(x + 1, y + 1, z + 1, 1) + LIGHT(x, y + 1, z + 1, 1)) / 5.0f / 15.0f;
+					float lg3 = (LIGHT(x + 1, y + 1, z, 1) + lg * 30 + LIGHT(x + 1, y + 1, z - 1, 1) + LIGHT(x, y + 1, z - 1, 1)) / 5.0f / 15.0f;
+
+					float lb0 = (LIGHT(x - 1, y + 1, z, 2) + lb * 30 + LIGHT(x - 1, y + 1, z - 1, 2) + LIGHT(x, y + 1, z - 1, 2)) / 5.0f / 15.0f;
+					float lb1 = (LIGHT(x - 1, y + 1, z, 2) + lb * 30 + LIGHT(x - 1, y + 1, z + 1, 2) + LIGHT(x, y + 1, z + 1, 2)) / 5.0f / 15.0f;
+					float lb2 = (LIGHT(x + 1, y + 1, z, 2) + lb * 30 + LIGHT(x + 1, y + 1, z + 1, 2) + LIGHT(x, y + 1, z + 1, 2)) / 5.0f / 15.0f;
+					float lb3 = (LIGHT(x + 1, y + 1, z, 2) + lb * 30 + LIGHT(x + 1, y + 1, z - 1, 2) + LIGHT(x, y + 1, z - 1, 2)) / 5.0f / 15.0f;
+
+					float ls0 = (LIGHT(x - 1, y + 1, z, 3) + ls * 30 + LIGHT(x - 1, y + 1, z - 1, 3) + LIGHT(x, y + 1, z - 1, 3)) / 5.0f / 15.0f;
+					float ls1 = (LIGHT(x - 1, y + 1, z, 3) + ls * 30 + LIGHT(x - 1, y + 1, z + 1, 3) + LIGHT(x, y + 1, z + 1, 3)) / 5.0f / 15.0f;
+					float ls2 = (LIGHT(x + 1, y + 1, z, 3) + ls * 30 + LIGHT(x + 1, y + 1, z + 1, 3) + LIGHT(x, y + 1, z + 1, 3)) / 5.0f / 15.0f;
+					float ls3 = (LIGHT(x + 1, y + 1, z, 3) + ls * 30 + LIGHT(x + 1, y + 1, z - 1, 3) + LIGHT(x, y + 1, z - 1, 3)) / 5.0f / 15.0f;
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v1, lr3, lg3, lb3, ls3);
 				}
 				if (!IS_BLOCKED(x, y - 1, z)) {
 					l = 0.75f;
-						a = IS_BLOCKED(x + 1, y - 1, z) * aoFactor;
-						b = IS_BLOCKED(x, y - 1, z + 1) * aoFactor;
-						c = IS_BLOCKED(x - 1, y - 1, z) * aoFactor;
-						d = IS_BLOCKED(x, y - 1, z - 1) * aoFactor;
-						e = IS_BLOCKED(x - 1, y - 1, z + 1) * aoFactor;
-						f = IS_BLOCKED(x - 1, y - 1, z + 1) * aoFactor;
-						g = IS_BLOCKED(x + 1, y - 1, z + 1) * aoFactor;
-						h = IS_BLOCKED(x + 1, y - 1, z - 1) * aoFactor;
-					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
-					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v2, l * (1.0f - c - b - f));
+					float lr = LIGHT(x, y - 1, z, 0) / 15.0f;
+					float lg = LIGHT(x, y - 1, z, 1) / 15.0f;
+					float lb = LIGHT(x, y - 1, z, 2) / 15.0f;
+					float ls = LIGHT(x, y - 1, z, 3) / 15.0f;
 
-					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u2, v1, l * (1.0f - a - d - h));
-					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
+					float lr0 = (LIGHT(x - 1, y - 1, z - 1, 0) + lr * 30 + LIGHT(x - 1, y - 1, z, 0) + LIGHT(x, y - 1, z - 1, 0)) / 5.0f / 15.0f;
+					float lr1 = (LIGHT(x + 1, y - 1, z + 1, 0) + lr * 30 + LIGHT(x + 1, y - 1, z, 0) + LIGHT(x, y - 1, z + 1, 0)) / 5.0f / 15.0f;
+					float lr2 = (LIGHT(x - 1, y - 1, z + 1, 0) + lr * 30 + LIGHT(x - 1, y - 1, z, 0) + LIGHT(x, y - 1, z + 1, 0)) / 5.0f / 15.0f;
+					float lr3 = (LIGHT(x + 1, y - 1, z - 1, 0) + lr * 30 + LIGHT(x + 1, y - 1, z, 0) + LIGHT(x, y - 1, z - 1, 0)) / 5.0f / 15.0f;
+
+					float lg0 = (LIGHT(x - 1, y - 1, z - 1, 1) + lg * 30 + LIGHT(x - 1, y - 1, z, 1) + LIGHT(x, y - 1, z - 1, 1)) / 5.0f / 15.0f;
+					float lg1 = (LIGHT(x + 1, y - 1, z + 1, 1) + lg * 30 + LIGHT(x + 1, y - 1, z, 1) + LIGHT(x, y - 1, z + 1, 1)) / 5.0f / 15.0f;
+					float lg2 = (LIGHT(x - 1, y - 1, z + 1, 1) + lg * 30 + LIGHT(x - 1, y - 1, z, 1) + LIGHT(x, y - 1, z + 1, 1)) / 5.0f / 15.0f;
+					float lg3 = (LIGHT(x + 1, y - 1, z - 1, 1) + lg * 30 + LIGHT(x + 1, y - 1, z, 1) + LIGHT(x, y - 1, z - 1, 1)) / 5.0f / 15.0f;
+
+					float lb0 = (LIGHT(x - 1, y - 1, z - 1, 2) + lb * 30 + LIGHT(x - 1, y - 1, z, 2) + LIGHT(x, y - 1, z - 1, 2)) / 5.0f / 15.0f;
+					float lb1 = (LIGHT(x + 1, y - 1, z + 1, 2) + lb * 30 + LIGHT(x + 1, y - 1, z, 2) + LIGHT(x, y - 1, z + 1, 2)) / 5.0f / 15.0f;
+					float lb2 = (LIGHT(x - 1, y - 1, z + 1, 2) + lb * 30 + LIGHT(x - 1, y - 1, z, 2) + LIGHT(x, y - 1, z + 1, 2)) / 5.0f / 15.0f;
+					float lb3 = (LIGHT(x + 1, y - 1, z - 1, 2) + lb * 30 + LIGHT(x + 1, y - 1, z, 2) + LIGHT(x, y - 1, z - 1, 2)) / 5.0f / 15.0f;
+
+					float ls0 = (LIGHT(x - 1, y - 1, z - 1, 3) + ls * 30 + LIGHT(x - 1, y - 1, z, 3) + LIGHT(x, y - 1, z - 1, 3)) / 5.0f / 15.0f;
+					float ls1 = (LIGHT(x + 1, y - 1, z + 1, 3) + ls * 30 + LIGHT(x + 1, y - 1, z, 3) + LIGHT(x, y - 1, z + 1, 3)) / 5.0f / 15.0f;
+					float ls2 = (LIGHT(x - 1, y - 1, z + 1, 3) + ls * 30 + LIGHT(x - 1, y - 1, z, 3) + LIGHT(x, y - 1, z + 1, 3)) / 5.0f / 15.0f;
+					float ls3 = (LIGHT(x + 1, y - 1, z - 1, 3) + ls * 30 + LIGHT(x + 1, y - 1, z, 3) + LIGHT(x, y - 1, z - 1, 3)) / 5.0f / 15.0f;
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u2, v1, lr3, lg3, lb3, ls3);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
 				}
 
 				if (!IS_BLOCKED(x + 1, y, z)) {
 					l = 0.95f;
 
-						a = IS_BLOCKED(x + 1, y + 1, z) * aoFactor;
-						b = IS_BLOCKED(x + 1, y, z + 1) * aoFactor;
-						c = IS_BLOCKED(x + 1, y - 1, z) * aoFactor;
-						d = IS_BLOCKED(x + 1, y, z - 1) * aoFactor;
-						e = IS_BLOCKED(x + 1, y - 1, z - 1) * aoFactor;
-						f = IS_BLOCKED(x + 1, y - 1, z + 1) * aoFactor;
-						g = IS_BLOCKED(x + 1, y + 1, z + 1) * aoFactor;
-						h = IS_BLOCKED(x + 1, y + 1, z - 1) * aoFactor;
-					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u2, v2, l * (1.0f - d - a - h));
-					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, l * (1.0f - a - b - g));
+					float lr = LIGHT(x + 1, y, z, 0) / 15.0f;
+					float lg = LIGHT(x + 1, y, z, 1) / 15.0f;
+					float lb = LIGHT(x + 1, y, z, 2) / 15.0f;
+					float ls = LIGHT(x + 1, y, z, 3) / 15.0f;
 
-					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u2, v1, l* (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, l* (1.0f - a - b - g));
-					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u1, v1, l* (1.0f - b - c - f));
+					float lr0 = (LIGHT(x + 1, y - 1, z - 1, 0) + lr * 30 + LIGHT(x + 1, y, z - 1, 0) + LIGHT(x + 1, y - 1, z, 0)) / 5.0f / 15.0f;
+					float lr1 = (LIGHT(x + 1, y + 1, z - 1, 0) + lr * 30 + LIGHT(x + 1, y, z - 1, 0) + LIGHT(x + 1, y + 1, z, 0)) / 5.0f / 15.0f;
+					float lr2 = (LIGHT(x + 1, y + 1, z + 1, 0) + lr * 30 + LIGHT(x + 1, y, z + 1, 0) + LIGHT(x + 1, y + 1, z, 0)) / 5.0f / 15.0f;
+					float lr3 = (LIGHT(x + 1, y - 1, z + 1, 0) + lr * 30 + LIGHT(x + 1, y, z + 1, 0) + LIGHT(x + 1, y - 1, z, 0)) / 5.0f / 15.0f;
+
+					float lg0 = (LIGHT(x + 1, y - 1, z - 1, 1) + lg * 30 + LIGHT(x + 1, y, z - 1, 1) + LIGHT(x + 1, y - 1, z, 1)) / 5.0f / 15.0f;
+					float lg1 = (LIGHT(x + 1, y + 1, z - 1, 1) + lg * 30 + LIGHT(x + 1, y, z - 1, 1) + LIGHT(x + 1, y + 1, z, 1)) / 5.0f / 15.0f;
+					float lg2 = (LIGHT(x + 1, y + 1, z + 1, 1) + lg * 30 + LIGHT(x + 1, y, z + 1, 1) + LIGHT(x + 1, y + 1, z, 1)) / 5.0f / 15.0f;
+					float lg3 = (LIGHT(x + 1, y - 1, z + 1, 1) + lg * 30 + LIGHT(x + 1, y, z + 1, 1) + LIGHT(x + 1, y - 1, z, 1)) / 5.0f / 15.0f;
+
+					float lb0 = (LIGHT(x + 1, y - 1, z - 1, 2) + lb * 30 + LIGHT(x + 1, y, z - 1, 2) + LIGHT(x + 1, y - 1, z, 2)) / 5.0f / 15.0f;
+					float lb1 = (LIGHT(x + 1, y + 1, z - 1, 2) + lb * 30 + LIGHT(x + 1, y, z - 1, 2) + LIGHT(x + 1, y + 1, z, 2)) / 5.0f / 15.0f;
+					float lb2 = (LIGHT(x + 1, y + 1, z + 1, 2) + lb * 30 + LIGHT(x + 1, y, z + 1, 2) + LIGHT(x + 1, y + 1, z, 2)) / 5.0f / 15.0f;
+					float lb3 = (LIGHT(x + 1, y - 1, z + 1, 2) + lb * 30 + LIGHT(x + 1, y, z + 1, 2) + LIGHT(x + 1, y - 1, z, 2)) / 5.0f / 15.0f;
+
+					float ls0 = (LIGHT(x + 1, y - 1, z - 1, 3) + ls * 30 + LIGHT(x + 1, y, z - 1, 3) + LIGHT(x + 1, y - 1, z, 3)) / 5.0f / 15.0f;
+					float ls1 = (LIGHT(x + 1, y + 1, z - 1, 3) + ls * 30 + LIGHT(x + 1, y, z - 1, 3) + LIGHT(x + 1, y + 1, z, 3)) / 5.0f / 15.0f;
+					float ls2 = (LIGHT(x + 1, y + 1, z + 1, 3) + ls * 30 + LIGHT(x + 1, y, z + 1, 3) + LIGHT(x + 1, y + 1, z, 3)) / 5.0f / 15.0f;
+					float ls3 = (LIGHT(x + 1, y - 1, z + 1, 3) + ls * 30 + LIGHT(x + 1, y, z + 1, 3) + LIGHT(x + 1, y - 1, z, 3)) / 5.0f / 15.0f;
+
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u2, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u2, v2, lr1, lg1, lb1, ls1);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u2, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u1, v1, lr3, lg3, lb3, ls3);
 				}
 				if (!IS_BLOCKED(x - 1, y, z)) {
 					l = 0.85f;
-						a = IS_BLOCKED(x - 1, y + 1, z) * aoFactor;
-						b = IS_BLOCKED(x - 1, y, z + 1) * aoFactor;
-						c = IS_BLOCKED(x - 1, y - 1, z) * aoFactor;
-						d = IS_BLOCKED(x - 1, y, z - 1) * aoFactor;
-						e = IS_BLOCKED(x - 1, y - 1, z - 1) * aoFactor;
-						f = IS_BLOCKED(x - 1, y - 1, z + 1) * aoFactor;
-						g = IS_BLOCKED(x - 1, y + 1, z + 1) * aoFactor;
-						h = IS_BLOCKED(x - 1, y + 1, z - 1) * aoFactor;
+					float lr = LIGHT(x - 1, y, z, 0) / 15.0f;
+					float lg = LIGHT(x - 1, y, z, 1) / 15.0f;
+					float lb = LIGHT(x - 1, y, z, 2) / 15.0f;
+					float ls = LIGHT(x - 1, y, z, 3) / 15.0f;
 
-					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
-					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u1, v2, l * (1.0f - d - a - h));
+					float lr0 = (LIGHT(x - 1, y - 1, z - 1, 0) + lr * 30 + LIGHT(x - 1, y, z - 1, 0) + LIGHT(x - 1, y - 1, z, 0)) / 5.0f / 15.0f;
+					float lr1 = (LIGHT(x - 1, y + 1, z + 1, 0) + lr * 30 + LIGHT(x - 1, y, z + 1, 0) + LIGHT(x - 1, y + 1, z, 0)) / 5.0f / 15.0f;
+					float lr2 = (LIGHT(x - 1, y + 1, z - 1, 0) + lr * 30 + LIGHT(x - 1, y, z - 1, 0) + LIGHT(x - 1, y + 1, z, 0)) / 5.0f / 15.0f;
+					float lr3 = (LIGHT(x - 1, y - 1, z + 1, 0) + lr * 30 + LIGHT(x - 1, y, z + 1, 0) + LIGHT(x - 1, y - 1, z, 0)) / 5.0f / 15.0f;
 
-					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u2, v1, l * (1.0f - b - c - f));
-					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
+					float lg0 = (LIGHT(x - 1, y - 1, z - 1, 1) + lg * 30 + LIGHT(x - 1, y, z - 1, 1) + LIGHT(x - 1, y - 1, z, 1)) / 5.0f / 15.0f;
+					float lg1 = (LIGHT(x - 1, y + 1, z + 1, 1) + lg * 30 + LIGHT(x - 1, y, z + 1, 1) + LIGHT(x - 1, y + 1, z, 1)) / 5.0f / 15.0f;
+					float lg2 = (LIGHT(x - 1, y + 1, z - 1, 1) + lg * 30 + LIGHT(x - 1, y, z - 1, 1) + LIGHT(x - 1, y + 1, z, 1)) / 5.0f / 15.0f;
+					float lg3 = (LIGHT(x - 1, y - 1, z + 1, 1) + lg * 30 + LIGHT(x - 1, y, z + 1, 1) + LIGHT(x - 1, y - 1, z, 1)) / 5.0f / 15.0f;
+
+					float lb0 = (LIGHT(x - 1, y - 1, z - 1, 2) + lb * 30 + LIGHT(x - 1, y, z - 1, 2) + LIGHT(x - 1, y - 1, z, 2)) / 5.0f / 15.0f;
+					float lb1 = (LIGHT(x - 1, y + 1, z + 1, 2) + lb * 30 + LIGHT(x - 1, y, z + 1, 2) + LIGHT(x - 1, y + 1, z, 2)) / 5.0f / 15.0f;
+					float lb2 = (LIGHT(x - 1, y + 1, z - 1, 2) + lb * 30 + LIGHT(x - 1, y, z - 1, 2) + LIGHT(x - 1, y + 1, z, 2)) / 5.0f / 15.0f;
+					float lb3 = (LIGHT(x - 1, y - 1, z + 1, 2) + lb * 30 + LIGHT(x - 1, y, z + 1, 2) + LIGHT(x - 1, y - 1, z, 2)) / 5.0f / 15.0f;
+
+					float ls0 = (LIGHT(x - 1, y - 1, z - 1, 3) + ls * 30 + LIGHT(x - 1, y, z - 1, 3) + LIGHT(x - 1, y - 1, z, 3)) / 5.0f / 15.0f;
+					float ls1 = (LIGHT(x - 1, y + 1, z + 1, 3) + ls * 30 + LIGHT(x - 1, y, z + 1, 3) + LIGHT(x - 1, y + 1, z, 3)) / 5.0f / 15.0f;
+					float ls2 = (LIGHT(x - 1, y + 1, z - 1, 3) + ls * 30 + LIGHT(x - 1, y, z - 1, 3) + LIGHT(x - 1, y + 1, z, 3)) / 5.0f / 15.0f;
+					float ls3 = (LIGHT(x - 1, y - 1, z + 1, 3) + ls * 30 + LIGHT(x - 1, y, z + 1, 3) + LIGHT(x - 1, y - 1, z, 3)) / 5.0f / 15.0f;
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u2, v1, lr3, lg3, lb3, ls3);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
 				}
 
 				if (!IS_BLOCKED(x, y, z + 1)) {
 					l = 0.9f;
-						a = IS_BLOCKED(x, y + 1, z + 1) * aoFactor;
-						b = IS_BLOCKED(x + 1, y, z + 1) * aoFactor;
-						c = IS_BLOCKED(x, y - 1, z + 1) * aoFactor;
-						d = IS_BLOCKED(x - 1, y, z + 1) * aoFactor;
-						e = IS_BLOCKED(x - 1, y - 1, z + 1) * aoFactor;
-						f = IS_BLOCKED(x + 1, y - 1, z + 1) * aoFactor;
-						g = IS_BLOCKED(x + 1, y + 1, z + 1) * aoFactor;
-						h = IS_BLOCKED(x - 1, y + 1, z + 1) * aoFactor;
-					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
-					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u1, v2, l * (1.0f - a - d - h));
+					float lr = LIGHT(x, y, z + 1, 0) / 15.0f;
+					float lg = LIGHT(x, y, z + 1, 1) / 15.0f;
+					float lb = LIGHT(x, y, z + 1, 2) / 15.0f;
+					float ls = LIGHT(x, y, z + 1, 3) / 15.0f;
 
-					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v1, l * (1.0f - b - c - f));
-					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
+					float lr0 = l * (LIGHT(x - 1, y - 1, z + 1, 0) + lr * 30 + LIGHT(x, y - 1, z + 1, 0) + LIGHT(x - 1, y, z + 1, 0)) / 5.0f / 15.0f;
+					float lr1 = l * (LIGHT(x + 1, y + 1, z + 1, 0) + lr * 30 + LIGHT(x, y + 1, z + 1, 0) + LIGHT(x + 1, y, z + 1, 0)) / 5.0f / 15.0f;
+					float lr2 = l * (LIGHT(x - 1, y + 1, z + 1, 0) + lr * 30 + LIGHT(x, y + 1, z + 1, 0) + LIGHT(x - 1, y, z + 1, 0)) / 5.0f / 15.0f;
+					float lr3 = l * (LIGHT(x + 1, y - 1, z + 1, 0) + lr * 30 + LIGHT(x, y - 1, z + 1, 0) + LIGHT(x + 1, y, z + 1, 0)) / 5.0f / 15.0f;
+
+					float lg0 = l * (LIGHT(x - 1, y - 1, z + 1, 1) + lg * 30 + LIGHT(x, y - 1, z + 1, 1) + LIGHT(x - 1, y, z + 1, 1)) / 5.0f / 15.0f;
+					float lg1 = l * (LIGHT(x + 1, y + 1, z + 1, 1) + lg * 30 + LIGHT(x, y + 1, z + 1, 1) + LIGHT(x + 1, y, z + 1, 1)) / 5.0f / 15.0f;
+					float lg2 = l * (LIGHT(x - 1, y + 1, z + 1, 1) + lg * 30 + LIGHT(x, y + 1, z + 1, 1) + LIGHT(x - 1, y, z + 1, 1)) / 5.0f / 15.0f;
+					float lg3 = l * (LIGHT(x + 1, y - 1, z + 1, 1) + lg * 30 + LIGHT(x, y - 1, z + 1, 1) + LIGHT(x + 1, y, z + 1, 1)) / 5.0f / 15.0f;
+
+					float lb0 = l * (LIGHT(x - 1, y - 1, z + 1, 2) + lb * 30 + LIGHT(x, y - 1, z + 1, 2) + LIGHT(x - 1, y, z + 1, 2)) / 5.0f / 15.0f;
+					float lb1 = l * (LIGHT(x + 1, y + 1, z + 1, 2) + lb * 30 + LIGHT(x, y + 1, z + 1, 2) + LIGHT(x + 1, y, z + 1, 2)) / 5.0f / 15.0f;
+					float lb2 = l * (LIGHT(x - 1, y + 1, z + 1, 2) + lb * 30 + LIGHT(x, y + 1, z + 1, 2) + LIGHT(x - 1, y, z + 1, 2)) / 5.0f / 15.0f;
+					float lb3 = l * (LIGHT(x + 1, y - 1, z + 1, 2) + lb * 30 + LIGHT(x, y - 1, z + 1, 2) + LIGHT(x + 1, y, z + 1, 2)) / 5.0f / 15.0f;
+
+					float ls0 = l * (LIGHT(x - 1, y - 1, z + 1, 3) + ls * 30 + LIGHT(x, y - 1, z + 1, 3) + LIGHT(x - 1, y, z + 1, 3)) / 5.0f / 15.0f;
+					float ls1 = l * (LIGHT(x + 1, y + 1, z + 1, 3) + ls * 30 + LIGHT(x, y + 1, z + 1, 3) + LIGHT(x + 1, y, z + 1, 3)) / 5.0f / 15.0f;
+					float ls2 = l * (LIGHT(x - 1, y + 1, z + 1, 3) + ls * 30 + LIGHT(x, y + 1, z + 1, 3) + LIGHT(x - 1, y, z + 1, 3)) / 5.0f / 15.0f;
+					float ls3 = l * (LIGHT(x + 1, y - 1, z + 1, 3) + ls * 30 + LIGHT(x, y - 1, z + 1, 3) + LIGHT(x + 1, y, z + 1, 3)) / 5.0f / 15.0f;
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
+					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v1, lr2, lg2, lb2, ls2);
+					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u2, v2, lr3, lg3, lb3, ls3);
 				}
 				if (!IS_BLOCKED(x, y, z - 1)) {
 					l = 0.8f;
-						a = IS_BLOCKED(x, y + 1, z - 1) * aoFactor;
-						b = IS_BLOCKED(x + 1, y, z - 1) * aoFactor;
-						c = IS_BLOCKED(x, y - 1, z - 1) * aoFactor;
-						d = IS_BLOCKED(x - 1, y, z - 1) * aoFactor;
-						e = IS_BLOCKED(x - 1, y - 1, z - 1) * aoFactor;
-						f = IS_BLOCKED(x + 1, y - 1, z - 1) * aoFactor;
-						g = IS_BLOCKED(x + 1, y + 1, z - 1) * aoFactor;
-						h = IS_BLOCKED(x - 1, y + 1, z - 1) * aoFactor;
-					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v2, l * (1.0f - a - d - h));
-					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v2, l * (1.0f - a - b - g));
+					float lr = LIGHT(x, y, z - 1, 0) / 15.0f;
+					float lg = LIGHT(x, y, z - 1, 1) / 15.0f;
+					float lb = LIGHT(x, y, z - 1, 2) / 15.0f;
+					float ls = LIGHT(x, y, z - 1, 3) / 15.0f;
 
-					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
-					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v2, l * (1.0f - a - b - g));
-					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u1, v1, l * (1.0f - b - c - f));
+					float lr0 = l * (LIGHT(x - 1, y - 1, z - 1, 0) + lr * 30 + LIGHT(x, y - 1, z - 1, 0) + LIGHT(x - 1, y, z - 1, 0)) / 5.0f / 15.0f;
+					float lr1 = l * (LIGHT(x - 1, y + 1, z - 1, 0) + lr * 30 + LIGHT(x, y + 1, z - 1, 0) + LIGHT(x - 1, y, z - 1, 0)) / 5.0f / 15.0f;
+					float lr2 = l * (LIGHT(x + 1, y + 1, z - 1, 0) + lr * 30 + LIGHT(x, y + 1, z - 1, 0) + LIGHT(x + 1, y, z - 1, 0)) / 5.0f / 15.0f;
+					float lr3 = l * (LIGHT(x + 1, y - 1, z - 1, 0) + lr * 30 + LIGHT(x, y - 1, z - 1, 0) + LIGHT(x + 1, y, z - 1, 0)) / 5.0f / 15.0f;
+
+					float lg0 = l * (LIGHT(x - 1, y - 1, z - 1, 1) + lg * 30 + LIGHT(x, y - 1, z - 1, 1) + LIGHT(x - 1, y, z - 1, 1)) / 5.0f / 15.0f;
+					float lg1 = l * (LIGHT(x - 1, y + 1, z - 1, 1) + lg * 30 + LIGHT(x, y + 1, z - 1, 1) + LIGHT(x - 1, y, z - 1, 1)) / 5.0f / 15.0f;
+					float lg2 = l * (LIGHT(x + 1, y + 1, z - 1, 1) + lg * 30 + LIGHT(x, y + 1, z - 1, 1) + LIGHT(x + 1, y, z - 1, 1)) / 5.0f / 15.0f;
+					float lg3 = l * (LIGHT(x + 1, y - 1, z - 1, 1) + lg * 30 + LIGHT(x, y - 1, z - 1, 1) + LIGHT(x + 1, y, z - 1, 1)) / 5.0f / 15.0f;
+
+					float lb0 = l * (LIGHT(x - 1, y - 1, z - 1, 2) + lb * 30 + LIGHT(x, y - 1, z - 1, 2) + LIGHT(x - 1, y, z - 1, 2)) / 5.0f / 15.0f;
+					float lb1 = l * (LIGHT(x - 1, y + 1, z - 1, 2) + lb * 30 + LIGHT(x, y + 1, z - 1, 2) + LIGHT(x - 1, y, z - 1, 2)) / 5.0f / 15.0f;
+					float lb2 = l * (LIGHT(x + 1, y + 1, z - 1, 2) + lb * 30 + LIGHT(x, y + 1, z - 1, 2) + LIGHT(x + 1, y, z - 1, 2)) / 5.0f / 15.0f;
+					float lb3 = l * (LIGHT(x + 1, y - 1, z - 1, 2) + lb * 30 + LIGHT(x, y - 1, z - 1, 2) + LIGHT(x + 1, y, z - 1, 2)) / 5.0f / 15.0f;
+
+					float ls0 = l * (LIGHT(x - 1, y - 1, z - 1, 3) + ls * 30 + LIGHT(x, y - 1, z - 1, 3) + LIGHT(x - 1, y, z - 1, 3)) / 5.0f / 15.0f;
+					float ls1 = l * (LIGHT(x - 1, y + 1, z - 1, 3) + ls * 30 + LIGHT(x, y + 1, z - 1, 3) + LIGHT(x - 1, y, z - 1, 3)) / 5.0f / 15.0f;
+					float ls2 = l * (LIGHT(x + 1, y + 1, z - 1, 3) + ls * 30 + LIGHT(x, y + 1, z - 1, 3) + LIGHT(x + 1, y, z - 1, 3)) / 5.0f / 15.0f;
+					float ls3 = l * (LIGHT(x + 1, y - 1, z - 1, 3) + ls * 30 + LIGHT(x, y - 1, z - 1, 3) + LIGHT(x + 1, y, z - 1, 3)) / 5.0f / 15.0f;
+
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u2, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v2, lr1, lg1, lb1, ls1);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v2, lr2, lg2, lb2, ls2);
+					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u2, v1, lr0, lg0, lb0, ls0);
+					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v2, lr3, lg3, lb3, ls3);
+					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u1, v1, lr1, lg1, lb1, ls1);
 				}
 			}
 		}

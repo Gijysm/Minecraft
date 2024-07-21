@@ -8,6 +8,8 @@
 #include "Event.h"
 #include "VoxelRender.h"
 #include "Shader.h"
+#include "LightSolver.h"
+#include "LightMap.h"
 #include "Files.h"
 #include "LineBranch.h"
 #include "Png_loading.h"
@@ -88,6 +90,27 @@ int main()
     float currentTime = 0;
     float delta = 0;
     float CamX = 0, CamY = 0;
+    int Choosen_block = 1;
+    LightSolver* SolverR = new LightSolver(chunks, 0);
+    LightSolver* SolverG = new LightSolver(chunks, 1);
+    LightSolver* SolverB = new LightSolver(chunks, 2);
+    LightSolver* SolverS = new LightSolver(chunks, 3);
+    for (size_t y = 0; y < chunks->h * _CHUNK_H; y++)
+    {
+        for (size_t z = 0; z < chunks->d * _CHUNK_D; z++)
+        {
+            for (size_t x = 0; x < chunks->w * _CHUNK_W; x++)
+            {
+                voxel* vox = chunks->Get(x, y, z);
+                if (vox->id == 3)
+                {
+                    SolverR->Add(x, y, 15);
+                    SolverG->Add(x, y, 15);
+                    SolverB->Add(x, y, 15);
+                }
+            }
+        }
+    }
     // Main loop
     glClearColor(0.6, 0.62, 0.65, 1);
     while (!Window::shouldClose())
