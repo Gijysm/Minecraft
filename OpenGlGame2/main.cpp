@@ -187,7 +187,7 @@ int main()
                 oz += 1;
                 closes[(oy * 3 + oz) * 3 + ox] = other;
             }
-            Mesh* mesh = renderer.render(chunk, (const Chunk**)closes, true);
+            Mesh* mesh = renderer.render(chunk, (const Chunk**)closes);
             meshes[i] = mesh;
         }
 

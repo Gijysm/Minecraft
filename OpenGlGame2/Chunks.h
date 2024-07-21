@@ -12,9 +12,11 @@ private:
 	size_t volume;
 public:
 	Chunk** chunks;
+
 	uint w, h, d;
 	Chunks(uint w, uint h, uint  d);
 	const size_t& Getvolume();
+	unsigned char getLight(int x, int y, int z, int channel);
 	Chunk* GetChunk(int i);
 	Chunk* GetChunk(int x, int y, int z);
 	voxel* Get(int x, int y, int z);
@@ -22,6 +24,7 @@ public:
 	void Set(int x, int y, int z, int id);
 	void write(unsigned char* info);
 	void read(unsigned char* source);
+	Chunk* GetChunkByVoxel(int x, int y, int z);
 	~Chunks();
 };
 

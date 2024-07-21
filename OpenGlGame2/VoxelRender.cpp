@@ -5,10 +5,11 @@
 #define IS_IN(X,Y,Z) ((X) >= 0 && (X) < _CHUNK_W && (Y) >= 0 && (Y) < _CHUNK_H && (Z) >= 0 && (Z) < _CHUNK_D)
 #define VOXEL(X, Y, Z) (GET_CHUNK(X,Y,Z)->voxels[(LOCAL(Y, _CHUNK_H) * _CHUNK_D + LOCAL(Z, _CHUNK_D)) * _CHUNK_W + LOCAL(X, _CHUNK_W)])
 #define LOCAL(X, SIZE) ((X) >= (SIZE) ? ((X) - (SIZE)) : LOCAL_NEG(X, SIZE))
+#define LIGHT(X,Y,Z,CHANNEL) (IS_CHUNK(X,Y,Z) ? GET_CHUNK(X,Y,Z)->lightmap->Get(LOCAL(LOCAL(X, _CHUNK_W), LOCAL(Y, _CHUNK_H), LOCAL(Z, _CHUNK_D), (CHANNEL)) : 0)
 #define GET_CHUNK(X, Y, Z) (chunks[((CDVI(Y, _CHUNK_H) + 1) * 3 + CDVI(Z, _CHUNK_D) + 1) * 3 + CDVI(X, _CHUNK_W) + 1])
 #define IS_CHUNK(X,Y,Z) (GET_CHUNK(X,Y,Z) != nullptr)
 #define IS_BLOCKED(X, Y, Z) ((!IS_CHUNK(X, Y, Z)) || VOXEL(X, Y, Z).id)
-#define VERTEX(INDEX, X, Y, Z, U, V, L) \
+#define VERTEX(INDEX, X, Y, Z, U, V, L, R,G,B,S) \
 buffer[INDEX + 0] = X; \
 buffer[INDEX + 1] = Y; \
 buffer[INDEX + 2] = Z; \
@@ -26,7 +27,7 @@ VoxelRender::~VoxelRender()
 {
 	delete [] buffer;
 }
-Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclusion)
+Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 {
 	float aoFactor = 0.15;
 	size_t index = 0;
@@ -53,8 +54,7 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 
 				if (!IS_BLOCKED(x, y + 1, z)) {
 					l = 1.0f;
-					if (ambientOcclusion)
-					{
+
 						a = IS_BLOCKED(x + 1, y + 1, z) * aoFactor;
 						b = IS_BLOCKED(x - 1, y + 1, z) * aoFactor;
 						c = IS_BLOCKED(x, y + 1, z + 1) * aoFactor;
@@ -63,7 +63,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 						f = IS_BLOCKED(x - 1, y + 1, z + 1) * aoFactor;
 						g = IS_BLOCKED(x + 1, y + 1, z - 1) * aoFactor;
 						h = IS_BLOCKED(x - 1, y + 1, z - 1) * aoFactor;
-					}
 					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
 					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - d - a - h));
 					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, l * (1.0f - a - b - g));
@@ -74,8 +73,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 				}
 				if (!IS_BLOCKED(x, y - 1, z)) {
 					l = 0.75f;
-					if(ambientOcclusion)
-					{
 						a = IS_BLOCKED(x + 1, y - 1, z) * aoFactor;
 						b = IS_BLOCKED(x, y - 1, z + 1) * aoFactor;
 						c = IS_BLOCKED(x - 1, y - 1, z) * aoFactor;
@@ -84,7 +81,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 						f = IS_BLOCKED(x - 1, y - 1, z + 1) * aoFactor;
 						g = IS_BLOCKED(x + 1, y - 1, z + 1) * aoFactor;
 						h = IS_BLOCKED(x + 1, y - 1, z - 1) * aoFactor;
-					}
 					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, l * (1.0f - c - d - e));
 					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
 					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v2, l * (1.0f - c - b - f));
@@ -96,8 +92,7 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 
 				if (!IS_BLOCKED(x + 1, y, z)) {
 					l = 0.95f;
-					if(ambientOcclusion)
-					{
+
 						a = IS_BLOCKED(x + 1, y + 1, z) * aoFactor;
 						b = IS_BLOCKED(x + 1, y, z + 1) * aoFactor;
 						c = IS_BLOCKED(x + 1, y - 1, z) * aoFactor;
@@ -106,7 +101,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 						f = IS_BLOCKED(x + 1, y - 1, z + 1) * aoFactor;
 						g = IS_BLOCKED(x + 1, y + 1, z + 1) * aoFactor;
 						h = IS_BLOCKED(x + 1, y + 1, z - 1) * aoFactor;
-					}
 					VERTEX(index, x + 0.5f, y - 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
 					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u2, v2, l * (1.0f - d - a - h));
 					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, l * (1.0f - a - b - g));
@@ -117,8 +111,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 				}
 				if (!IS_BLOCKED(x - 1, y, z)) {
 					l = 0.85f;
-					if(ambientOcclusion)
-					{
 						a = IS_BLOCKED(x - 1, y + 1, z) * aoFactor;
 						b = IS_BLOCKED(x - 1, y, z + 1) * aoFactor;
 						c = IS_BLOCKED(x - 1, y - 1, z) * aoFactor;
@@ -127,7 +119,7 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 						f = IS_BLOCKED(x - 1, y - 1, z + 1) * aoFactor;
 						g = IS_BLOCKED(x - 1, y + 1, z + 1) * aoFactor;
 						h = IS_BLOCKED(x - 1, y + 1, z - 1) * aoFactor;
-					}
+
 					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u1, v1, l * (1.0f - c - d - e));
 					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
 					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u1, v2, l * (1.0f - d - a - h));
@@ -139,8 +131,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 
 				if (!IS_BLOCKED(x, y, z + 1)) {
 					l = 0.9f;
-					if(ambientOcclusion)
-					{
 						a = IS_BLOCKED(x, y + 1, z + 1) * aoFactor;
 						b = IS_BLOCKED(x + 1, y, z + 1) * aoFactor;
 						c = IS_BLOCKED(x, y - 1, z + 1) * aoFactor;
@@ -149,7 +139,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 						f = IS_BLOCKED(x + 1, y - 1, z + 1) * aoFactor;
 						g = IS_BLOCKED(x + 1, y + 1, z + 1) * aoFactor;
 						h = IS_BLOCKED(x - 1, y + 1, z + 1) * aoFactor;
-					}
 					VERTEX(index, x - 0.5f, y - 0.5f, z + 0.5f, u1, v1, l * (1.0f - c - d - e));
 					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u2, v2, l * (1.0f - a - b - g));
 					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u1, v2, l * (1.0f - a - d - h));
@@ -160,8 +149,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 				}
 				if (!IS_BLOCKED(x, y, z - 1)) {
 					l = 0.8f;
-					if(ambientOcclusion)
-					{
 						a = IS_BLOCKED(x, y + 1, z - 1) * aoFactor;
 						b = IS_BLOCKED(x + 1, y, z - 1) * aoFactor;
 						c = IS_BLOCKED(x, y - 1, z - 1) * aoFactor;
@@ -170,7 +157,6 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks, bool ambientOcclus
 						f = IS_BLOCKED(x + 1, y - 1, z - 1) * aoFactor;
 						g = IS_BLOCKED(x + 1, y + 1, z - 1) * aoFactor;
 						h = IS_BLOCKED(x - 1, y + 1, z - 1) * aoFactor;
-					}
 					VERTEX(index, x - 0.5f, y - 0.5f, z - 0.5f, u2, v1, l * (1.0f - c - d - e));
 					VERTEX(index, x - 0.5f, y + 0.5f, z - 0.5f, u2, v2, l * (1.0f - a - d - h));
 					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v2, l * (1.0f - a - b - g));

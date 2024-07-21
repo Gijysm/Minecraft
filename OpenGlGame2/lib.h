@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <queue>
 #include <vector>
 #include <exception>
 #include <glew.h>

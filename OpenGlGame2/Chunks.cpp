@@ -21,6 +21,23 @@ const size_t& Chunks::Getvolume()
 	return volume;
 }
 
+unsigned char Chunks::getLight(int x, int y, int z, int channel)
+{
+	int cx = x / _CHUNK_W;
+	int cy = y / _CHUNK_H;
+	int cz = z / _CHUNK_D;
+	if (x < 0) cx--;
+	if (y < 0) cy--;
+	if (z < 0) cz--;
+	if (cx < 0 || cy < 0 || cz < 0 || cx >= w || cy >= h || cz >= d)
+		return 0;
+	Chunk* chunk = chunks[(cy * d + cz) * w + cx];
+	int lx = x - cx * _CHUNK_W;
+	int ly = y - cy * _CHUNK_H;
+	int lz = z - cz * _CHUNK_D;
+	return chunk->lightmap->get(lx, ly, lz, channel);
+}
+
 Chunk* Chunks::GetChunk(int i)
 {
 	if (i < 0 || i >= Getvolume()) {
@@ -206,6 +223,18 @@ void Chunks::read(unsigned char* source)
 			source[index] = chunk->voxels[j].id;
 			chunk->voxels[j].id = source[index];
 		}
-		chunk->modifier = true;
+		chunk->modifier = true; 
 	}
+}
+Chunk* Chunks::GetChunkByVoxel(int x, int y, int z)
+{
+	int cx = x / _CHUNK_W;
+	int cy = y / _CHUNK_H;
+	int cz = z / _CHUNK_D;
+	if (x < 0) cx--;
+	if (y < 0) cy--;
+	if (z < 0) cz--;
+	if (cx < 0 || cy < 0 || cz < 0 || cx >= w || cy >= h || cz >= d)
+		return nullptr;
+	return chunks[(cy * d + cz) * w + cx];
 }

@@ -46,9 +46,14 @@ class LightMap
 		map[index] = (map[index] & 0xFFF0) | (value << 8);
 	}					 
 	inline void SetS(int x, int y, int z, int value)
-	{					 
+	{
 		const int index = y * _CHUNK_D * _CHUNK_W + z * _CHUNK_W + x;
 		map[index] = (map[index] & 0xFFF0) | (value << 12);
+	}
+	inline void Set(int x, int y, int z, int value, int channel)
+	{
+		const int index = y * _CHUNK_D * _CHUNK_W + z * _CHUNK_W + x;
+		map[index] = (map[index] & (0xFFF0 & (~(0xF << (channel * 4))))) | (value << (channel << 2));
 	}
 
 };

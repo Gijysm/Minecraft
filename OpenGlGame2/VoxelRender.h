@@ -5,18 +5,19 @@
 #include "Chunk.h"
 #include "Mesh.h"
 #include "Voxel.h"
+#include "LightMap.h"
 class Mesh;
 class Chunk;
 class VoxelRender
 {
-	int artts[4] = { 3, 2, 1, 0 };
+	int artts[4] = { 3, 2, 4, 0 };
 	float* buffer;
 	size_t capacity;
 public:
 	VoxelRender(size_t capacity);
 	~VoxelRender();
 
-	Mesh* render(Chunk* chunk, const Chunk** chunks, bool ambientOcclusion);
+	Mesh* render(Chunk* chunk, const Chunk** chunks);
 };
 
 #endif // !VOXEL_RENDER_H

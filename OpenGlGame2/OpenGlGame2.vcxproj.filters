@@ -90,6 +90,9 @@
     <ClCompile Include="LightMap.cpp">
       <Filter>Light</Filter>
     </ClCompile>
+    <ClCompile Include="LightSolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="LightMap.h">
       <Filter>Light</Filter>
+    </ClInclude>
+    <ClInclude Include="LightSolver.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

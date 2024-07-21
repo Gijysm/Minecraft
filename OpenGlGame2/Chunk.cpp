@@ -2,6 +2,7 @@
 
 Chunk::Chunk(int xpos, int ypos, int zpos) : x(xpos), y(ypos), z(zpos)
 {
+	lightmap = new LightMap();
 	voxels = new voxel[_CHUNK_SIZE];
 	for (int z = 0; z < _CHUNK_D; z++) {
 		for (int x = 0; x < _CHUNK_W; x++) {
@@ -24,3 +25,4 @@ Chunk::~Chunk()
 {
 	delete [] voxels;
 }
+

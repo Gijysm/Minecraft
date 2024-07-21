@@ -139,6 +139,7 @@
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Files.cpp" />
     <ClCompile Include="LightMap.cpp" />
+    <ClCompile Include="LightSolver.cpp" />
     <ClCompile Include="LineBranch.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -158,6 +159,7 @@
     <ClInclude Include="Files.h" />
     <ClInclude Include="lib.h" />
     <ClInclude Include="LightMap.h" />
+    <ClInclude Include="LightSolver.h" />
     <ClInclude Include="LineBranch.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Png_loading.h" />
