@@ -67,12 +67,11 @@ int main()
         Window::Terminate();
         return 0;
     }
-    Chunks* chunks = new Chunks(16, 8, 16);
+    Chunks* chunks = new Chunks(16, 16, 16);
     size_t chunkVolume = chunks->Getvolume();
     Mesh** meshes = new Mesh * [chunkVolume];
     for (size_t i = 0; i < chunkVolume; i++)
     {
-        chunks->chunks[i]->modifier = true;
         meshes[i] = nullptr;
     }
     VoxelRender renderer(1024 * 1024 * 8);
@@ -90,7 +89,7 @@ int main()
     float currentTime = 0;
     float delta = 0;
     float CamX = 0, CamY = 0;
-    int Choosen_block = 1;
+    int Choosen_block = 3;
     LightSolver* SolverR = new LightSolver(chunks, 0);
     LightSolver* SolverG = new LightSolver(chunks, 1);
     LightSolver* SolverB = new LightSolver(chunks, 2);
@@ -111,6 +110,57 @@ int main()
             }
         }
     }
+    for (size_t z = 0; z < chunks->d * _CHUNK_D; z++)
+    {
+        for (size_t x = 0; x < chunks->w * _CHUNK_W; x++)
+        {
+            for (size_t y = chunks->h * _CHUNK_H - 1; y >= 0; y--)
+            {
+                voxel* vox = chunks->Get(x, y, z);
+                if (vox->id != 0) {
+                    break;
+                }
+                chunks->GetChunkByVoxel(x, y, z)->lightmap->SetS(x % _CHUNK_W, y % _CHUNK_H, z % _CHUNK_D, 0xF);
+            }
+
+        }
+    }
+
+    for (int z = 0; z < chunks->d * _CHUNK_D; z++) {
+        for (int x = 0; x < chunks->w * _CHUNK_W; x++) {
+            for (int y = chunks->h * _CHUNK_H - 1; y >= 0; y--) {
+                voxel* vox = chunks->Get(x, y, z);
+                if (vox->id != 0) {
+                    break;
+                }
+                if (chunks->getLight(x - 1, y, z, 3) == 0 ||
+                    chunks->getLight(x + 1, y, z, 3) == 0 ||
+                    chunks->getLight(x, y - 1, z, 3) == 0 ||
+                    chunks->getLight(x, y + 1, z, 3) == 0 ||
+                    chunks->getLight(x, y, z - 1, 3) == 0 ||
+                    chunks->getLight(x, y, z + 1, 3) == 0) {
+                    SolverS->Add(x, y, z);
+                }
+                Chunk* chunk = chunks->GetChunkByVoxel(x, y, z);
+                if (!chunk) {
+                    std::cerr << "Null chunk at voxel (" << x << ", " << y << ", " << z << ")" << std::endl;
+                    continue;
+                }
+
+                if (!chunk->lightmap) {
+                    std::cerr << "Null lightmap at chunk (" << chunk->x << ", " << chunk->y << ", " << chunk->z << ")" << std::endl;
+                    continue;
+                }
+
+                chunk->lightmap->SetS(x % _CHUNK_W, y % _CHUNK_H, z % _CHUNK_D, 0xF);
+            }
+
+        }
+    }
+    SolverR->solve();
+    SolverG->solve();
+    SolverB->solve();
+    SolverS->solve();
     // Main loop
     glClearColor(0.6, 0.62, 0.65, 1);
     while (!Window::shouldClose())
@@ -177,11 +227,70 @@ int main()
                 branch->Cube(iend.x + 0.5f, iend.y + 0.5f, iend.z + 0.5f, 1.005f, 1.005f, 1.005f, 0, 0, 0, 0.5f);
                 if (Event::justClicked(GLFW_MOUSE_BUTTON_1))
                 {
-                    chunks->Set(iend.x, iend.y, iend.z, 0);
+                    int x = (int)(iend.x);
+                    int y = (int)(iend.y);
+                    int z = (int)(iend.z);
+                    chunks->Set(x, y, z, 0);
+
+                    SolverR->remove(x, y, z);
+                    SolverG->remove(x, y, z);
+                    SolverB->remove(x, y, z);
+                    SolverS->remove(x, y, z);
+
+                    SolverR->solve();
+                    SolverG->solve();
+                    SolverB->solve();
+                    if (chunks->getLight(x, y + 1, z, 3) == 0xF)
+                    {
+                        for (int i = y - 1; i >= 0; i--)
+                        {
+                            if (chunks->Get(x, i, z)->id != 0)
+                                break;
+                            SolverS->Add(x, i, z, 0xF);
+                        }
+                     }
+                    SolverR->Add(x, y + 1, z); SolverG->Add(x, y + 1, z); SolverB->Add(x, y + 1, z); SolverS->Add(x, y + 1, z);
+                    SolverR->Add(x, y - 1, z); SolverG->Add(x, y - 1, z); SolverB->Add(x, y - 1, z); SolverS->Add(x, y - 1, z);
+                    SolverR->Add(x + 1, y, z); SolverG->Add(x + 1, y, z); SolverB->Add(x + 1, y, z); SolverS->Add(x + 1, y, z);
+                    SolverR->Add(x - 1, y, z); SolverG->Add(x - 1, y, z); SolverB->Add(x - 1, y, z); SolverS->Add(x - 1, y, z);
+                    SolverR->Add(x, y, z + 1); SolverG->Add(x, y, z + 1); SolverB->Add(x, y, z + 1); SolverS->Add(x, y, z + 1);
+                    SolverR->Add(x, y, z - 1); SolverG->Add(x, y, z - 1); SolverB->Add(x, y, z - 1); SolverS->Add(x, y, z - 1);
+
+                    SolverR->solve();
+                    SolverG->solve();
+                    SolverB->solve();
+                    SolverS->solve();
                 }
                 if (Event::justClicked(GLFW_MOUSE_BUTTON_2))
                 {
-                    chunks->Set((int)(iend.x) + (int)(norm.x), (int)(iend.y) + (int)(norm.y), (int)(iend.z) + (int)(norm.z), 13);
+                    int x = (int)(iend.x) + (int) (norm.x);
+                    int y = (int)(iend.y) + (int)(norm.y);
+                    int z = (int)(iend.z) + (int)(norm.z);
+                    chunks->Set(x, y, z, Choosen_block);
+                    SolverR->Add(x, y, z);
+                    SolverG->Add(x, y, z);
+                    SolverB->Add(x, y, z);
+                    SolverS->Add(x, y, z);
+                    for (int i = y - 1; i >= 0; i--)
+                    {
+                        SolverS->remove(x, i, z);
+                        if(i ==0 || chunks->Get(x, i, z)->id != 0)
+							break;
+                    }
+                    SolverR->solve();
+                    SolverG->solve();
+                    SolverB->solve();
+                    SolverS->solve();
+                    if (Choosen_block == 3)
+                    {
+                        SolverR->Add(x, y, z, 10);
+                        SolverG->Add(x, y, z, 10);
+                        SolverB->Add(x, y, z, 0);
+                        SolverR->solve();
+                        SolverG->solve();
+                        SolverB->solve();
+                    }
+                    
                 }
             }
         }
@@ -236,6 +345,11 @@ int main()
         Window::swapBuffers();
         Event::PullEvents();
     }
+    delete SolverR;
+    delete SolverG;
+    delete SolverB;
+    delete SolverS;
+
     delete shader;
     delete texture;
     delete CrossShairshader;

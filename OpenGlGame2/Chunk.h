@@ -12,7 +12,7 @@ public:
 	int x, y, z;
 	LightMap* lightmap;
 	voxel* voxels;
-	bool modifier ;
+	bool modifier = true;
 	Chunk(int xpos, int ypos, int zpos);
 	~Chunk();
 	void initializeVoxels();

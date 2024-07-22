@@ -23,6 +23,7 @@ Chunk::Chunk(int xpos, int ypos, int zpos) : x(xpos), y(ypos), z(zpos)
 
 Chunk::~Chunk()
 {
+	delete lightmap;
 	delete [] voxels;
 }
 
