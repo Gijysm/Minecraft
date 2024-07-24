@@ -9,6 +9,7 @@
 #include "VoxelRender.h"
 #include "Shader.h"
 #include "LightSolver.h"
+#include "Lighting.h"
 #include "LightMap.h"
 #include "Files.h"
 #include "LineBranch.h"
@@ -68,9 +69,8 @@ int main()
         return 0;
     }
     Chunks* chunks = new Chunks(16, 16, 16);
-    size_t chunkVolume = chunks->Getvolume();
-    Mesh** meshes = new Mesh * [chunkVolume];
-    for (size_t i = 0; i < chunkVolume; i++)
+    Mesh** meshes = new Mesh* [chunks->Getvolume()];
+    for (size_t i = 0; i < chunks->Getvolume(); i++)
     {
         meshes[i] = nullptr;
     }
@@ -82,85 +82,16 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Camera* camera = new Camera(vec3(0, 0, 20), radians(70.0f));
+    Camera* camera = new Camera(vec3(96, 96, 96), radians(70.0f));
     Mesh* CrossShair = new Mesh(vertices, 4, artts);
 
     float lastTime = glfwGetTime();
     float currentTime = 0;
     float delta = 0;
     float CamX = 0, CamY = 0;
-    int Choosen_block = 3;
-    LightSolver* SolverR = new LightSolver(chunks, 0);
-    LightSolver* SolverG = new LightSolver(chunks, 1);
-    LightSolver* SolverB = new LightSolver(chunks, 2);
-    LightSolver* SolverS = new LightSolver(chunks, 3);
-    for (size_t y = 0; y < chunks->h * _CHUNK_H; y++)
-    {
-        for (size_t z = 0; z < chunks->d * _CHUNK_D; z++)
-        {
-            for (size_t x = 0; x < chunks->w * _CHUNK_W; x++)
-            {
-                voxel* vox = chunks->Get(x, y, z);
-                if (vox->id == 3)
-                {
-                    SolverR->Add(x, y, 15);
-                    SolverG->Add(x, y, 15);
-                    SolverB->Add(x, y, 15);
-                }
-            }
-        }
-    }
-    for (size_t z = 0; z < chunks->d * _CHUNK_D; z++)
-    {
-        for (size_t x = 0; x < chunks->w * _CHUNK_W; x++)
-        {
-            for (size_t y = chunks->h * _CHUNK_H - 1; y >= 0; y--)
-            {
-                voxel* vox = chunks->Get(x, y, z);
-                if (vox->id != 0) {
-                    break;
-                }
-                chunks->GetChunkByVoxel(x, y, z)->lightmap->SetS(x % _CHUNK_W, y % _CHUNK_H, z % _CHUNK_D, 0xF);
-            }
-
-        }
-    }
-
-    for (int z = 0; z < chunks->d * _CHUNK_D; z++) {
-        for (int x = 0; x < chunks->w * _CHUNK_W; x++) {
-            for (int y = chunks->h * _CHUNK_H - 1; y >= 0; y--) {
-                voxel* vox = chunks->Get(x, y, z);
-                if (vox->id != 0) {
-                    break;
-                }
-                if (chunks->getLight(x - 1, y, z, 3) == 0 ||
-                    chunks->getLight(x + 1, y, z, 3) == 0 ||
-                    chunks->getLight(x, y - 1, z, 3) == 0 ||
-                    chunks->getLight(x, y + 1, z, 3) == 0 ||
-                    chunks->getLight(x, y, z - 1, 3) == 0 ||
-                    chunks->getLight(x, y, z + 1, 3) == 0) {
-                    SolverS->Add(x, y, z);
-                }
-                Chunk* chunk = chunks->GetChunkByVoxel(x, y, z);
-                if (!chunk) {
-                    std::cerr << "Null chunk at voxel (" << x << ", " << y << ", " << z << ")" << std::endl;
-                    continue;
-                }
-
-                if (!chunk->lightmap) {
-                    std::cerr << "Null lightmap at chunk (" << chunk->x << ", " << chunk->y << ", " << chunk->z << ")" << std::endl;
-                    continue;
-                }
-
-                chunk->lightmap->SetS(x % _CHUNK_W, y % _CHUNK_H, z % _CHUNK_D, 0xF);
-            }
-
-        }
-    }
-    SolverR->solve();
-    SolverG->solve();
-    SolverB->solve();
-    SolverS->solve();
+    int Choosen_block = 4;
+    Lighting::instalize(chunks);
+    Lighting::onWorldLoaded();
     // Main loop
     glClearColor(0.6, 0.62, 0.65, 1);
     while (!Window::shouldClose())
@@ -174,18 +105,18 @@ int main()
         }
         if (Event::isKeyPressed(GLFW_KEY_F1))
         {
-            unsigned char* buffer = new unsigned char[chunkVolume * _CHUNK_SIZE];
+            unsigned char* buffer = new unsigned char[chunks->Getvolume() * _CHUNK_SIZE];
             chunks->write(buffer);
-            write_to_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (const char*) buffer, chunkVolume * _CHUNK_SIZE);
-            cout << "Saved in: " << (chunkVolume * _CHUNK_SIZE ) << endl;
+            write_to_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (const char*) buffer, chunks->Getvolume() * _CHUNK_SIZE);
+            cout << "Saved in: " << (chunks->Getvolume() * _CHUNK_SIZE ) << endl;
 
             delete[] buffer;
         }
         if (Event::isKeyPressed(GLFW_KEY_F2))
         {
-            unsigned char* buffer = new unsigned char[chunkVolume * _CHUNK_SIZE];
+            unsigned char* buffer = new unsigned char[chunks->Getvolume() * _CHUNK_SIZE];
             chunks->read(buffer);
-            read_from_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (char*)buffer, chunkVolume * _CHUNK_SIZE);
+            read_from_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (char*)buffer, chunks->Getvolume() * _CHUNK_SIZE);
 
             delete[] buffer;
         }
@@ -231,35 +162,7 @@ int main()
                     int y = (int)(iend.y);
                     int z = (int)(iend.z);
                     chunks->Set(x, y, z, 0);
-
-                    SolverR->remove(x, y, z);
-                    SolverG->remove(x, y, z);
-                    SolverB->remove(x, y, z);
-                    SolverS->remove(x, y, z);
-
-                    SolverR->solve();
-                    SolverG->solve();
-                    SolverB->solve();
-                    if (chunks->getLight(x, y + 1, z, 3) == 0xF)
-                    {
-                        for (int i = y - 1; i >= 0; i--)
-                        {
-                            if (chunks->Get(x, i, z)->id != 0)
-                                break;
-                            SolverS->Add(x, i, z, 0xF);
-                        }
-                     }
-                    SolverR->Add(x, y + 1, z); SolverG->Add(x, y + 1, z); SolverB->Add(x, y + 1, z); SolverS->Add(x, y + 1, z);
-                    SolverR->Add(x, y - 1, z); SolverG->Add(x, y - 1, z); SolverB->Add(x, y - 1, z); SolverS->Add(x, y - 1, z);
-                    SolverR->Add(x + 1, y, z); SolverG->Add(x + 1, y, z); SolverB->Add(x + 1, y, z); SolverS->Add(x + 1, y, z);
-                    SolverR->Add(x - 1, y, z); SolverG->Add(x - 1, y, z); SolverB->Add(x - 1, y, z); SolverS->Add(x - 1, y, z);
-                    SolverR->Add(x, y, z + 1); SolverG->Add(x, y, z + 1); SolverB->Add(x, y, z + 1); SolverS->Add(x, y, z + 1);
-                    SolverR->Add(x, y, z - 1); SolverG->Add(x, y, z - 1); SolverB->Add(x, y, z - 1); SolverS->Add(x, y, z - 1);
-
-                    SolverR->solve();
-                    SolverG->solve();
-                    SolverB->solve();
-                    SolverS->solve();
+                    Lighting::onBlockSet(x, y, z, 0);
                 }
                 if (Event::justClicked(GLFW_MOUSE_BUTTON_2))
                 {
@@ -267,35 +170,16 @@ int main()
                     int y = (int)(iend.y) + (int)(norm.y);
                     int z = (int)(iend.z) + (int)(norm.z);
                     chunks->Set(x, y, z, Choosen_block);
-                    SolverR->Add(x, y, z);
-                    SolverG->Add(x, y, z);
-                    SolverB->Add(x, y, z);
-                    SolverS->Add(x, y, z);
-                    for (int i = y - 1; i >= 0; i--)
-                    {
-                        SolverS->remove(x, i, z);
-                        if(i ==0 || chunks->Get(x, i, z)->id != 0)
-							break;
-                    }
-                    SolverR->solve();
-                    SolverG->solve();
-                    SolverB->solve();
-                    SolverS->solve();
-                    if (Choosen_block == 3)
-                    {
-                        SolverR->Add(x, y, z, 10);
-                        SolverG->Add(x, y, z, 10);
-                        SolverB->Add(x, y, z, 0);
-                        SolverR->solve();
-                        SolverG->solve();
-                        SolverB->solve();
-                    }
-                    
+                    Lighting::onBlockSet(x, y, z, Choosen_block);
                 }
             }
         }
         Chunk* closes[27];
-        for (size_t i = 0; i < chunkVolume; i++) {
+        for (size_t i = 0; i < chunks->Getvolume(); i++) {
+            if (i >= chunks->Getvolume()) {
+                std::cerr << "Index out of bounds: " << i << std::endl;
+                continue;
+            }
             Chunk* chunk = chunks->chunks[i];
             if (!chunk->modifier)
                 continue;
@@ -303,8 +187,10 @@ int main()
             if (meshes[i] != nullptr)
                 delete meshes[i];
             for (int j = 0; j < 27; j++)
+            {
                 closes[j] = nullptr;
-            for (size_t j = 0; j < chunkVolume; j++) {
+            }
+            for (size_t j = 0; j < chunks->Getvolume(); j++) {
                 Chunk* other = chunks->chunks[j];
 
                 int ox = other->x - chunk->x;
@@ -321,14 +207,15 @@ int main()
             }
             Mesh* mesh = renderer.render(chunk, (const Chunk**)closes);
             meshes[i] = mesh;
+            
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shader->use();
         shader->uniform_mat4("projview", camera->getProjection() * camera->getView());
         texture->bind();
-        mat4 model;
-        for (size_t i = 0; i < chunkVolume; i++)
+        mat4 model(1.0f);
+        for (size_t i = 0; i < chunks->Getvolume(); i++)
         {
             Chunk* chunk = chunks->chunks[i];
             Mesh* mesh = meshes[i];
@@ -345,10 +232,7 @@ int main()
         Window::swapBuffers();
         Event::PullEvents();
     }
-    delete SolverR;
-    delete SolverG;
-    delete SolverB;
-    delete SolverS;
+    Lighting::finalize();
 
     delete shader;
     delete texture;

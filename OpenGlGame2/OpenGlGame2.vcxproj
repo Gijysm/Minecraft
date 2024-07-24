@@ -133,11 +133,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Block.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Chunks.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Files.cpp" />
+    <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="LightMap.cpp" />
     <ClCompile Include="LightSolver.cpp" />
     <ClCompile Include="LineBranch.cpp" />
@@ -151,6 +153,7 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Block.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="Chunks.h" />
@@ -158,6 +161,7 @@
     <ClInclude Include="Event.h" />
     <ClInclude Include="Files.h" />
     <ClInclude Include="lib.h" />
+    <ClInclude Include="Lighting.h" />
     <ClInclude Include="LightMap.h" />
     <ClInclude Include="LightSolver.h" />
     <ClInclude Include="LineBranch.h" />

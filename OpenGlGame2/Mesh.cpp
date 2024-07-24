@@ -33,7 +33,7 @@ Mesh::~Mesh()
 
 }
 
-void Mesh::reload(const float* buffer, size_t vertices)
+void Mesh::reload(const float* buffer, const int& vertices)
 {
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -41,7 +41,7 @@ void Mesh::reload(const float* buffer, size_t vertices)
 	this->vertices = vertices;
 }
 
-void Mesh::draw(unsigned int primrtive)
+void Mesh::draw(const short unsigned int& primrtive)
 {
 	glBindVertexArray(VAO);
 	glDrawArrays(primrtive, 0, vertices);

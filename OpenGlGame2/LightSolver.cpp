@@ -18,11 +18,9 @@ void LightSolver::Add(int x, int y, int z, int emmision)
     addQueue.push(entry);
 
     Chunk* chunk = chunks->GetChunkByVoxel(entry.x, entry.y, entry.z);
-    if (chunk != nullptr)
-    {
+
         chunk->modifier = true;
         chunk->lightmap->Set(entry.x - chunk->x * _CHUNK_W, entry.y - chunk->y * _CHUNK_H, entry.z - chunk->z * _CHUNK_D, entry.light, channel);
-    }
 }
 
 void LightSolver::Add(int x, int y, int z)

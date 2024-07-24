@@ -25,23 +25,26 @@
     <Filter Include="Graphics\Loaders">
       <UniqueIdentifier>{16a1c31e-8038-49e2-9fbe-c73d6eda3e17}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Mesh">
-      <UniqueIdentifier>{fc9e1348-8412-47a2-b468-f52db81db067}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Mesh\Voxel">
-      <UniqueIdentifier>{41bdb74f-1a9f-424f-b0a9-f019a47e7f5a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Mesh\Chunks">
-      <UniqueIdentifier>{96a06c3d-d0f8-48ed-a6a0-f68c1808f1b1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Mesh\Chunks\Chunk">
-      <UniqueIdentifier>{053428a0-14b3-4624-a7d7-ac8b84b0746e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Files">
       <UniqueIdentifier>{bdcb1818-7520-46c8-a053-aafae52c15c0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Light">
       <UniqueIdentifier>{23f67ea9-1bd4-451b-a8e2-594196e09ceb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Block">
+      <UniqueIdentifier>{fc9e1348-8412-47a2-b468-f52db81db067}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Block\Voxel">
+      <UniqueIdentifier>{41bdb74f-1a9f-424f-b0a9-f019a47e7f5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Block\Chunks">
+      <UniqueIdentifier>{96a06c3d-d0f8-48ed-a6a0-f68c1808f1b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Block\Chunks\Chunk">
+      <UniqueIdentifier>{053428a0-14b3-4624-a7d7-ac8b84b0746e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Block\Mesh">
+      <UniqueIdentifier>{11fbeae4-a587-4371-b86d-1f7b28a33b78}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,26 +66,23 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="Voxel.cpp">
-      <Filter>Mesh\Voxel</Filter>
+      <Filter>Block\Voxel</Filter>
     </ClCompile>
     <ClCompile Include="Chunk.cpp">
-      <Filter>Mesh\Chunks\Chunk</Filter>
+      <Filter>Block\Chunks\Chunk</Filter>
     </ClCompile>
     <ClCompile Include="Png_loading.cpp">
       <Filter>Graphics\Loaders</Filter>
     </ClCompile>
     <ClCompile Include="VoxelRender.cpp">
-      <Filter>Mesh\Voxel</Filter>
+      <Filter>Block\Voxel</Filter>
     </ClCompile>
     <ClCompile Include="Chunks.cpp">
-      <Filter>Mesh\Chunks</Filter>
+      <Filter>Block\Chunks</Filter>
     </ClCompile>
     <ClCompile Include="LineBranch.cpp">
-      <Filter>Mesh\Voxel</Filter>
+      <Filter>Block\Voxel</Filter>
     </ClCompile>
     <ClCompile Include="Files.cpp">
       <Filter>Files</Filter>
@@ -92,6 +92,15 @@
     </ClCompile>
     <ClCompile Include="LightSolver.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lighting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Block\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>Block</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,14 +119,11 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="Voxel.h">
-      <Filter>Mesh\Voxel</Filter>
+      <Filter>Block\Voxel</Filter>
     </ClInclude>
     <ClInclude Include="Chunk.h">
-      <Filter>Mesh\Chunks\Chunk</Filter>
+      <Filter>Block\Chunks\Chunk</Filter>
     </ClInclude>
     <ClInclude Include="Png_loading.h">
       <Filter>Graphics\Loaders</Filter>
@@ -129,13 +135,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VoxelRender.h">
-      <Filter>Mesh\Voxel</Filter>
+      <Filter>Block\Voxel</Filter>
     </ClInclude>
     <ClInclude Include="Chunks.h">
-      <Filter>Mesh\Chunks</Filter>
+      <Filter>Block\Chunks</Filter>
     </ClInclude>
     <ClInclude Include="LineBranch.h">
-      <Filter>Mesh\Voxel</Filter>
+      <Filter>Block\Voxel</Filter>
     </ClInclude>
     <ClInclude Include="Files.h">
       <Filter>Files</Filter>
@@ -148,6 +154,15 @@
     </ClInclude>
     <ClInclude Include="LightSolver.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lighting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Block\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Block.h">
+      <Filter>Block</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

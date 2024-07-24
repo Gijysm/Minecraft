@@ -38,22 +38,22 @@ class LightMap
 	inline void SetG(int x, int y, int z, int value)
 	{					 
 		const int index = y * _CHUNK_D * _CHUNK_W + z * _CHUNK_W + x;
-		map[index] = (map[index] & 0xFFF0) | (value << 4);
+		map[index] = (map[index] & 0xFF0F) | (value << 4);
 	}					 
 	inline void SetB(int x, int y, int z, int value)
 	{					 
 		const int index = y * _CHUNK_D * _CHUNK_W + z * _CHUNK_W + x;
-		map[index] = (map[index] & 0xFFF0) | (value << 8);
+		map[index] = (map[index] & 0xF0FF) | (value << 8);
 	}					 
 	inline void SetS(int x, int y, int z, int value)
 	{
 		const int index = y * _CHUNK_D * _CHUNK_W + z * _CHUNK_W + x;
-		map[index] = (map[index] & 0xFFF0) | (value << 12);
+		map[index] = (map[index] & 0x0FFF) | (value << 12);
 	}
 	inline void Set(int x, int y, int z, int value, int channel)
 	{
 		const int index = y * _CHUNK_D * _CHUNK_W + z * _CHUNK_W + x;
-		map[index] = (map[index] & (0xFFF0 & (~(0xF << (channel * 4))))) | (value << (channel << 2));
+		map[index] = (map[index] & (0xFFFF & (~(0xF << (channel * 4))))) | (value << (channel << 2));
 	}
 
 };

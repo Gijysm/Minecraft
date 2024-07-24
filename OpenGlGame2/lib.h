@@ -17,6 +17,7 @@
 #include<vec2.hpp>
 #include<vec3.hpp>
 #include<vec4.hpp>
+#include <cstdint>
 #include<mat4x4.hpp>
 #include <SOIL2.h>
 using namespace std;

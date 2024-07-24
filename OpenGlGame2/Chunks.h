@@ -13,8 +13,8 @@ private:
 public:
 	Chunk** chunks;
 
-	uint w, h, d;
-	Chunks(uint w, uint h, uint  d);
+	uint8_t w, h, d;
+	Chunks(const uint& w, const uint& h, const uint&  d);
 	const size_t& Getvolume();
 	unsigned char getLight(int x, int y, int z, int channel);
 	Chunk* GetChunk(int i);

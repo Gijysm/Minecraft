@@ -1,6 +1,6 @@
 #include "Chunks.h"
 
-Chunks::Chunks(uint w, uint h, uint d) :w(w), h(h), d(d)
+Chunks::Chunks(const uint& w, const uint& h, const uint& d) :w(w), h(h), d(d)
 {
 	volume = w * h * d;
 	this->chunks = new Chunk*[volume];

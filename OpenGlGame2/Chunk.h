@@ -9,11 +9,11 @@ class LightMap;
 class Chunk
 {
 public:
-	int x, y, z;
+	int16 x, y, z;
 	LightMap* lightmap;
 	voxel* voxels;
 	bool modifier = true;
-	Chunk(int xpos, int ypos, int zpos);
+	Chunk(int& xpos, int& ypos, int& zpos);
 	~Chunk();
 	void initializeVoxels();
 };
