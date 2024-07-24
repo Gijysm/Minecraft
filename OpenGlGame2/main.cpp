@@ -12,6 +12,7 @@
 #include "Lighting.h"
 #include "LightMap.h"
 #include "Files.h"
+#include "Block.h"
 #include "LineBranch.h"
 #include "Png_loading.h"
 #include "Texture.h"
@@ -68,7 +69,25 @@ int main()
         Window::Terminate();
         return 0;
     }
-    Chunks* chunks = new Chunks(16, 16, 16);
+    {
+        Block* block = new Block(1,1);
+        Block::blocks[block->id] = block;
+
+        block = new Block(2, 2);
+        Block::blocks[block->id] = block;
+
+        block = new Block(3, 4);
+        block->textureFaces[2] = 2;
+        block->textureFaces[3] = 1;
+        Block::blocks[block->id] = block;
+
+        block = new Block(4, 30);
+        block->emission[0] = 10;
+        block->emission[1] = 10;
+        Block::blocks[block->id] = block;
+
+    }
+    Chunks* chunks = new Chunks(5, 5, 5);
     Mesh** meshes = new Mesh* [chunks->Getvolume()];
     for (size_t i = 0; i < chunks->Getvolume(); i++)
     {

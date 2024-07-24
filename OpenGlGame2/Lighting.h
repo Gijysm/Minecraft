@@ -6,6 +6,7 @@
 #include "LightMap.h"
 #include "Chunk.h"
 #include "Chunks.h"
+#include "Block.h"
 #include "Voxel.h"
 
 class Lighting

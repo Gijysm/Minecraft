@@ -145,11 +145,12 @@ void Lighting::onBlockSet(int x, int y, int z, int id)
         solverG->solve();
         solverB->solve();
         solverS->solve();
-        if (id == 4)
+        Block* block = Block::blocks[id];
+        if (block->emission[0] || block->emission[1] || block->emission[2])
         {
-            solverR->Add(x, y, z, 10);
-            solverG->Add(x, y, z, 10);
-            solverB->Add(x, y, z, 10);
+            solverR->Add(x, y, z, block->emission[0]);
+            solverG->Add(x, y, z, block->emission[1]);
+            solverB->Add(x, y, z, block->emission[2]);
             solverR->solve();
             solverG->solve();
             solverB->solve();

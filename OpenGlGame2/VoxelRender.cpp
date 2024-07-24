@@ -47,12 +47,12 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 				}
 
 				float l;
-				float uvsize = 16.f / 512.0f;
-				float u1 = (float)(id % 16) * uvsize;
+				float uvsize = 1.f / 16.0f;
+				float u1 = (float)(id % 512) * uvsize;
 				float u2 = u1 + uvsize;
-				float v1 = ((1 + id / 16) / uvsize);
+				float v1 = (id / 512) * uvsize;
 				float v2 = v1 + uvsize;
-
+				printf("ID: %d, u1: %f, u2: %f, v1: %f, v2: %f\n", id, u1, u2, v1, v2);
 
 				if (!IS_BLOCKED(x, y + 1, z)) {
 					l = 1.0f;

@@ -4,7 +4,7 @@
 class Block
 {
 public:
-	static Block blocks[256];
+	static Block* blocks[256];
 
 
 	Block(unsigned int id, int16_t texture);
