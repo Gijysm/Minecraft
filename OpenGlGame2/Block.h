@@ -13,6 +13,8 @@ public:
 	const unsigned int id;
 	int textureFaces[6];
 	unsigned char emission[3];
+	unsigned char drawGroup = 0;
+	bool LightPassing = false;
 };
 
 #endif // !BLOCK_H

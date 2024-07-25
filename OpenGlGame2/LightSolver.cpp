@@ -75,6 +75,7 @@ void LightSolver::solve()
             int y = entry.y + coords[i * 3 + 1];
             int z = entry.z + coords[i * 3 + 2];
             Chunk* chunk = chunks->GetChunkByVoxel(x, y, z);
+
             if (chunk != nullptr)
             {
                 int light = chunks->getLight(x, y, z, channel);
@@ -121,7 +122,8 @@ void LightSolver::solve()
             {
                 int light = chunks->getLight(x, y, z, channel);
                 voxel* v = chunks->Get(x, y, z);
-                if (v != nullptr && v->id == 0 && light + 2 <= entry.light)
+                Block* block = Block::blocks[v->id];
+                if (block->LightPassing && light + 2 <= entry.light)
                 {
                     chunk->lightmap->Set(x - chunk->x * _CHUNK_W, y - chunk->y * _CHUNK_H, z - chunk->z * _CHUNK_D, entry.light - 1, channel);
                     chunk->modifier = true;

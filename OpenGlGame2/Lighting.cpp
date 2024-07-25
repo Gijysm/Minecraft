@@ -6,6 +6,25 @@ LightSolver* Lighting::solverG = nullptr;
 LightSolver* Lighting::solverB = nullptr;
 LightSolver* Lighting::solverS = nullptr;
 
+void Lighting::Clear()
+{
+    for (unsigned int y = 0; y < chunks->h * _CHUNK_H; y++)
+    {
+        for (unsigned int z = 0; z < chunks->d * _CHUNK_D; z++)
+        {
+            for (unsigned int x = 0; x < chunks->w * _CHUNK_W; x++)
+            {
+                Chunk* chunk = chunks->GetChunkByVoxel(x, y, z);
+                LightMap* lightmap = chunk->lightmap;
+                for (int i = 0; i < _CHUNK_SIZE; i++)
+                {
+                    lightmap->map[i] = 0;
+                }
+            }
+        }
+    }
+}
+
 int Lighting::instalize(Chunks* chunks)
 {
 	Lighting::chunks = chunks;

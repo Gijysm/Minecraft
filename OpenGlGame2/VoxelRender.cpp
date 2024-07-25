@@ -8,8 +8,12 @@
 #define LOCAL(X, SIZE) ((X) >= (SIZE) ? ((X) - (SIZE)) : LOCAL_NEG(X, SIZE))
 #define GET_CHUNK(X, Y, Z) (chunks[((CDVI(Y, _CHUNK_H) + 1) * 3 + CDVI(Z, _CHUNK_D) + 1) * 3 + CDVI(X, _CHUNK_W) + 1])
 #define IS_CHUNK(X,Y,Z) (GET_CHUNK(X,Y,Z) != nullptr)
-#define IS_BLOCKED(X, Y, Z) ((!IS_CHUNK(X, Y, Z)) || VOXEL(X, Y, Z).id)
+#define IS_BLOCKED(X, Y, Z,GROUP) ((!IS_CHUNK(X, Y, Z)) || Block::blocks[VOXEL(X, Y, Z).id]->drawGroup == (GROUP))
 #define LIGHT(X,Y,Z,CHANNEL) (IS_CHUNK(X, Y, Z) ? GET_CHUNK(X, Y, Z)->lightmap->get(LOCAL(X, _CHUNK_W), LOCAL(Y, _CHUNK_H), LOCAL(Z, _CHUNK_D), (CHANNEL)) : 0)
+#define SETUP_UV(INDEX) float u1 = (float)((INDEX) % 16) * uvsize;\
+float u2 = u1 + uvsize;\
+float v1 = (((INDEX) / 16) * uvsize);\
+float v2 = v1 + uvsize;
 
 #define VERTEX(INDEX, X, Y, Z, U, V, R, G, B, S) \
     buffer[INDEX + 0] = X; \
@@ -34,6 +38,7 @@ VoxelRender::~VoxelRender()
 }
 Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 {
+
 	float aoFactor = 0.15;
 	size_t index = 0;
 	for (int y = 0; y < _CHUNK_H; y++) {
@@ -47,15 +52,13 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 				}
 
 				float l;
-				float uvsize = 1.f / 16.0f;
-				float u1 = (float)(id % 512) * uvsize;
-				float u2 = u1 + uvsize;
-				float v1 = (id / 512) * uvsize;
-				float v2 = v1 + uvsize;
-				printf("ID: %d, u1: %f, u2: %f, v1: %f, v2: %f\n", id, u1, u2, v1, v2);
+				float uvsize = 1.f / 16.f;
+				Block* block = Block::blocks[id];
 
-				if (!IS_BLOCKED(x, y + 1, z)) {
+				unsigned char group = block->drawGroup;
+				if (!IS_BLOCKED(x, y + 1, z, group)) {
 					l = 1.0f;
+					SETUP_UV(block->textureFaces[3]);
 					lr = LIGHT(x, y + 1, z, 0) / 15.0f;
 					lg = LIGHT(x, y + 1, z, 1) / 15.0f;
 					lb = LIGHT(x, y + 1, z, 2) / 15.0f;
@@ -87,8 +90,9 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
 					VERTEX(index, x + 0.5f, y + 0.5f, z - 0.5f, u1, v1, lr3, lg3, lb3, ls3);
 				}
-				if (!IS_BLOCKED(x, y - 1, z)) {
+				if (!IS_BLOCKED(x, y - 1, z, group)) {
 					l = 0.75f;
+					SETUP_UV(block->textureFaces[2]);
 					lr = LIGHT(x, y - 1, z, 0) / 15.0f;
 					lg = LIGHT(x, y - 1, z, 1) / 15.0f;
 					lb = LIGHT(x, y - 1, z, 2) / 15.0f;
@@ -121,9 +125,9 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
 				}
 
-				if (!IS_BLOCKED(x + 1, y, z)) {
+				if (!IS_BLOCKED(x + 1, y, z, group)) {
 					l = 0.95f;
-
+					SETUP_UV(block->textureFaces[1]);
 					lr = LIGHT(x + 1, y, z, 0) / 15.0f;
 					lg = LIGHT(x + 1, y, z, 1) / 15.0f;
 					lb = LIGHT(x + 1, y, z, 2) / 15.0f;
@@ -156,8 +160,9 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u1, v2, lr2, lg2, lb2, ls2);
 					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u1, v1, lr3, lg3, lb3, ls3);
 				}
-				if (!IS_BLOCKED(x - 1, y, z)) {
+				if (!IS_BLOCKED(x - 1, y, z, group)) {
 					l = 0.85f;
+					SETUP_UV(block->textureFaces[0]);
 					lr = LIGHT(x - 1, y, z, 0) / 15.0f;
 					lg = LIGHT(x - 1, y, z, 1) / 15.0f;
 					lb = LIGHT(x - 1, y, z, 2) / 15.0f;
@@ -190,8 +195,9 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 					VERTEX(index, x - 0.5f, y + 0.5f, z + 0.5f, u2, v2, lr1, lg1, lb1, ls1);
 				}
 
-				if (!IS_BLOCKED(x, y, z + 1)) {
+				if (!IS_BLOCKED(x, y, z + 1, group)) {
 					l = 0.9f;
+					SETUP_UV(block->textureFaces[5]);
 					lr  = LIGHT(x, y, z + 1, 0) / 15.0f;
 					lg  = LIGHT(x, y, z + 1, 1) / 15.0f;
 					lb  = LIGHT(x, y, z + 1, 2) / 15.0f;
@@ -223,8 +229,9 @@ Mesh* VoxelRender::render(Chunk* chunk, const Chunk** chunks)
 					VERTEX(index, x + 0.5f, y - 0.5f, z + 0.5f, u2, v1, lr2, lg2, lb2, ls2);
 					VERTEX(index, x + 0.5f, y + 0.5f, z + 0.5f, u2, v2, lr3, lg3, lb3, ls3);
 				}
-				if (!IS_BLOCKED(x, y, z - 1)) {
+				if (!IS_BLOCKED(x, y, z - 1, group)) {
 					l = 0.8f;
+					SETUP_UV(block->textureFaces[4]);
 					lr = LIGHT(x, y, z - 1, 0) / 15.0f;
 					lg = LIGHT(x, y, z - 1, 1) / 15.0f;
 					lb = LIGHT(x, y, z - 1, 2) / 15.0f;

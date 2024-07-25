@@ -61,7 +61,7 @@ int main()
     }
 
     // Load Texture
-    Texture* texture = load_texture("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\ATLAS\\14w25a_textures_0.png");
+    Texture* texture = load_texture("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\ATLAS\\block.png");
     if (texture == nullptr)
     {
         std::cerr << "Failed to load texture" << std::endl;
@@ -70,24 +70,35 @@ int main()
         return 0;
     }
     {
-        Block* block = new Block(1,1);
+        Block* block = new Block(0,0);
+        block ->drawGroup = 1;
+        block->LightPassing = true;
+        Block::blocks[block->id] = block;
+
+        block = new Block(1, 2);
         Block::blocks[block->id] = block;
 
         block = new Block(2, 2);
-        Block::blocks[block->id] = block;
-
-        block = new Block(3, 4);
+        block->textureFaces[0] = 2;
+        block->textureFaces[1] = 2;
         block->textureFaces[2] = 2;
         block->textureFaces[3] = 1;
+        block->textureFaces[4] = 2;
+        block->textureFaces[5] = 2;
         Block::blocks[block->id] = block;
 
-        block = new Block(4, 30);
+        block = new Block(3, 6);
         block->emission[0] = 10;
         block->emission[1] = 10;
         Block::blocks[block->id] = block;
 
+        block = new Block(4, 5);
+        block->drawGroup = 2;
+        block->LightPassing = true;
+        Block::blocks[block->id] = block;
+
     }
-    Chunks* chunks = new Chunks(5, 5, 5);
+    Chunks* chunks = new Chunks(6, 6, 6);
     Mesh** meshes = new Mesh* [chunks->Getvolume()];
     for (size_t i = 0; i < chunks->Getvolume(); i++)
     {
@@ -108,7 +119,7 @@ int main()
     float currentTime = 0;
     float delta = 0;
     float CamX = 0, CamY = 0;
-    int Choosen_block = 4;
+    int Choosen_block = 3;
     Lighting::instalize(chunks);
     Lighting::onWorldLoaded();
     // Main loop
@@ -118,6 +129,13 @@ int main()
         currentTime = glfwGetTime();
         delta = currentTime - lastTime;
         lastTime = currentTime;
+        for(int i = 1; i < 5; i++)
+		{
+			if (Event::isKeyPressed(GLFW_KEY_0 + i))
+			{
+				Choosen_block = i;
+			}
+		}
         if (Event::isKeyPressed(GLFW_KEY_TAB))
         {
             Event::toogleCursor();
@@ -134,9 +152,10 @@ int main()
         if (Event::isKeyPressed(GLFW_KEY_F2))
         {
             unsigned char* buffer = new unsigned char[chunks->Getvolume() * _CHUNK_SIZE];
-            chunks->read(buffer);
             read_from_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (char*)buffer, chunks->Getvolume() * _CHUNK_SIZE);
-
+            chunks->read(buffer);
+            Lighting::Clear();
+            Lighting::onWorldLoaded();
             delete[] buffer;
         }
         if (Event::isKeyPressed(GLFW_KEY_W))

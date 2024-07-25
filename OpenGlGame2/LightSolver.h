@@ -6,6 +6,7 @@
 #include "Chunks.h"
 #include "Chunk.h"
 #include "Voxel.h"
+#include "Block.h"
 struct Lightentry
 {
 	int x, 

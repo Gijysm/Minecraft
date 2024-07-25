@@ -220,7 +220,6 @@ void Chunks::read(unsigned char* source)
 
 		for (size_t j = 0; j < _CHUNK_SIZE; j++, index++)
 		{
-			source[index] = chunk->voxels[j].id;
 			chunk->voxels[j].id = source[index];
 		}
 		chunk->modifier = true; 

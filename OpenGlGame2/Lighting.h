@@ -18,6 +18,7 @@ class Lighting
 	static LightSolver* solverS;
 
 	public:
+		static void Clear();
 		static int instalize(Chunks* chunks);
 		static void finalize();
 		static void onWorldLoaded();

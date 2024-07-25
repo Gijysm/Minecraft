@@ -5,6 +5,7 @@
 #include "Chunk.h"
 #include "Mesh.h"
 #include "Voxel.h"
+#include "Block.h"
 #include "LightMap.h"
 class Mesh;
 class Chunk;
