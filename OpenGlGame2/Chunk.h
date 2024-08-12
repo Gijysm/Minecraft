@@ -15,6 +15,7 @@ public:
 	bool modifier = true;
 	Chunk(int& xpos, int& ypos, int& zpos);
 	~Chunk();
+	bool isEmpty();
 	void initializeVoxels();
 };
 

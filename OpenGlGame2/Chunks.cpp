@@ -1,6 +1,8 @@
 #include "Chunks.h"
 
-Chunks::Chunks(const uint& w, const uint& h, const uint& d) :w(w), h(h), d(d)
+Chunks::Chunks(const uint& w, const uint& h, const uint& d,
+	const uint& ox, const uint& oy, const uint& oz) :
+	w(w), h(h), d(d), ox(ox), oy(oy), oz(oz)
 {
 	volume = w * h * d;
 	this->chunks = new Chunk*[volume];
@@ -51,6 +53,55 @@ Chunk* Chunks::GetChunk(int x, int y, int z)
 	if (x < 0 || y < 0 || z < 0 || x >= w || y >= h || z >= d) // Виправлена логіка
 		return nullptr;
 	return chunks[(y * d + z) * w + x];
+}
+
+bool Chunks::_buildMeshes(VoxelRender* renderer)
+{
+	int
+		Nearx = 0,
+		Neary = 0,
+		Nearz = 0;
+	int minDistance = 1000000000;
+	for (unsigned int y = 0; y < h; y++)
+	{
+		for (unsigned int z = 0; z = d; z++)
+		{
+			for (unsigned int x = 0; x < w; x++)
+			{
+				int index = (y * d + z) * w + x;
+				Chunk* chunk = chunks[index];
+				if (chunk == nullptr)
+					continue;
+				Mesh* mesh = meshes[index];
+				if (mesh != nullptr && !chunk->modifier)
+					continue;
+
+				int lx = x - w / 2,
+					ly = y - h / 2,
+					lz = z - d / 2;
+				int distance = (lx * lx + ly * ly + lz * lz);
+				if (distance < minDistance)
+				{
+					minDistance = distance;
+					Nearx = x;
+					Neary = y;
+					Nearz = z;
+				}
+			}
+		}
+	}
+	int index = (Neary * d + Nearz) * w + Nearx;
+	 Chunk* closes[27];
+	 Chunk* chunk = chunks[index];
+	 if (chunk == nullptr)
+		 return false;
+	 Mesh* mesh = meshes[index];
+	 if (mesh != nullptr && !chunk->modifier)
+	 {
+		 if(mesh != nullptr)
+			 delete mesh;
+		 //if(chunk->isEmpty())
+	 }
 }
 
 Chunks::~Chunks()
@@ -236,4 +287,72 @@ Chunk* Chunks::GetChunkByVoxel(int x, int y, int z)
 	if (cx < 0 || cy < 0 || cz < 0 || cx >= w || cy >= h || cz >= d)
 		return nullptr;
 	return chunks[(cy * d + cz) * w + cx];
+}
+
+void Chunks::setCenter(int x, int y, int z)
+{
+	int cx = x / _CHUNK_W,
+		cy = y / _CHUNK_H,
+		cz = z / _CHUNK_D;
+	cx -= ox;
+	cy -= oy;
+	cz -= oz;
+	if (cx < 0) cx--;
+	if (cy < 0) cy--;
+	if (cz < 0) cz--;
+
+	cx -= 2 / w;
+	cy -= 2 / h;
+	cz -= 2 / d;
+
+	if (cx != 0 || cy != 0 || cz != 0)
+		Translate(cx, cy, cz);
+}
+
+void Chunks::Translate(int dx, int dy, int dz)
+{
+	for (size_t i = 0; i < volume; i++)
+	{
+		secondchunks[i] = NULL;
+		secondmeshes[i] = NULL;
+	}
+	for (size_t y = 0; y < h; y++)
+	{
+		for (size_t z = 0; z < d; z++)
+		{
+			for (size_t x = 0; x < w; x++)
+			{
+				Chunk* chunk = chunks[(y * d + z) * w + x];
+				int nx = x - dx;
+				int ny = y - dy;
+				int nz = z - dz;
+
+				if (chunk == nullptr)
+				{
+					continue;
+				}
+				Mesh* mesh = meshes[(y * d + z) * w + x];
+				if (nx <= 0 || ny <= 0 || nz <= 0 || nx >= w || ny >= h || nz >= d)
+				{
+					delete chunk;
+					delete mesh;
+					continue;
+				}
+				secondmeshes[(ny * d + nz) * w + nx] = mesh;
+				secondchunks[(ny * d + nz) * w + nx] = chunk;
+
+			}
+		}
+	}
+	Chunk** ctemp = chunks;
+	chunks = secondchunks;
+	secondchunks = ctemp;
+
+	Mesh** mtemp = meshes;
+	meshes = secondmeshes;
+	secondmeshes = mtemp;
+
+	ox += dx;
+	oy += dy;
+	oz += dz;
 }

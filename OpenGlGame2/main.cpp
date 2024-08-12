@@ -35,24 +35,24 @@ int main()
     Event::instalization();
 
     // Load Shader
-    Shader* shader = load_shader("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\Shaders\\main.glslf",
-        "C:\\Users\\popka\\source\\repos\\OpenGlGame2\\Shaders\\main.glslv");
+    Shader* shader = load_shader("C:\\Users\\popka\\source\\repos\\Gijysm\\Minecraft\\Shaders\\main.glslf",
+        "C:\\Users\\popka\\source\\repos\\Gijysm\\Minecraft\\Shaders\\main.glslv");
     if (shader == nullptr)
     {
         std::cerr << "ERROR::SHADER::PROGRAM_LINKING::COMPILATION_FAILED\n" << std::endl;
         Window::Terminate();
         return 0;
     }
-    Shader* CrossShairshader = load_shader("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\Shaders\\CrossShair.glslf",
-        "C:\\Users\\popka\\source\\repos\\OpenGlGame2\\Shaders\\CrossShair.glslv");
+    Shader* CrossShairshader = load_shader("C:\\Users\\popka\\source\\repos\\Gijysm\\Minecraft\\Shaders\\CrossShair.glslf",
+        "C:\\Users\\popka\\source\\repos\\Gijysm\\Minecraft\\Shaders\\CrossShair.glslv");
     if (CrossShairshader == nullptr)
     {
         std::cerr << "ERROR::SHADER::PROGRAM_LINKING::COMPILATION_FAILED\n" << std::endl;
         Window::Terminate();
         return 0;
     }
-    Shader* Lineshader = load_shader("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\Shaders\\Lineshader.glslf",
-        "C:\\Users\\popka\\source\\repos\\OpenGlGame2\\Shaders\\Lineshader.glslv");
+    Shader* Lineshader = load_shader("C:\\Users\\popka\\source\\repos\\Gijysm\\Minecraft\\Shaders\\Lineshader.glslf",
+        "C:\\Users\\popka\\source\\repos\\Gijysm\\Minecraft\\Shaders\\Lineshader.glslv");
     if (Lineshader == nullptr)
     {
         std::cerr << "ERROR::SHADER::PROGRAM_LINKING::COMPILATION_FAILED\n" << std::endl;
@@ -61,7 +61,7 @@ int main()
     }
 
     // Load Texture
-    Texture* texture = load_texture("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\ATLAS\\block.png");
+    Texture* texture = load_texture("C:\\Users\\popka\\source\\repos\\Gijysm\\Minecraft\\ATLAS\\block.png");
     if (texture == nullptr)
     {
         std::cerr << "Failed to load texture" << std::endl;
@@ -218,7 +218,7 @@ int main()
                 std::cerr << "Index out of bounds: " << i << std::endl;
                 continue;
             }
-            Chunk* chunk = chunks->chunks[i];
+            Chunk* chunk = chunks->GetChunk(i);
             if (!chunk->modifier)
                 continue;
             chunk->modifier = false;
@@ -229,7 +229,7 @@ int main()
                 closes[j] = nullptr;
             }
             for (size_t j = 0; j < chunks->Getvolume(); j++) {
-                Chunk* other = chunks->chunks[j];
+                Chunk* other = chunks->GetChunk(j);
 
                 int ox = other->x - chunk->x;
                 int oy = other->y - chunk->y;
@@ -255,7 +255,7 @@ int main()
         mat4 model(1.0f);
         for (size_t i = 0; i < chunks->Getvolume(); i++)
         {
-            Chunk* chunk = chunks->chunks[i];
+            Chunk* chunk = chunks->GetChunk(i);
             Mesh* mesh = meshes[i];
             model = glm::translate(mat4(1.0f), vec3(chunk->x * _CHUNK_W + 0.5, chunk->y * _CHUNK_H + 0.5, chunk->z * _CHUNK_D + 0.5));
             shader->uniform_mat4("model", model);

@@ -27,3 +27,8 @@ Chunk::~Chunk()
 	delete [] voxels;
 }
 
+bool Chunk::isEmpty()
+{
+	if()
+}
+
