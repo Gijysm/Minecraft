@@ -121,7 +121,7 @@ int main()
     float CamX = 0, CamY = 0;
     int Choosen_block = 3;
     Lighting::instalize(chunks);
-    Lighting::onWorldLoaded();
+    /*Lighting::onWorldLoaded();*/
     // Main loop
     glClearColor(0.6, 0.62, 0.65, 1);
     while (!Window::shouldClose())
@@ -155,7 +155,7 @@ int main()
             read_from_file("C:\\Users\\popka\\source\\repos\\OpenGlGame2\\save.bin", (char*)buffer, chunks->Getvolume() * _CHUNK_SIZE);
             chunks->read(buffer);
             Lighting::Clear();
-            Lighting::onWorldLoaded();
+            /*Lighting::onWorldLoaded();*/
             delete[] buffer;
         }
         if (Event::isKeyPressed(GLFW_KEY_W))

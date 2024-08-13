@@ -29,6 +29,18 @@ Chunk::~Chunk()
 
 bool Chunk::isEmpty()
 {
-	if()
+	int index = -1;
+	for (int i = 0; i < _CHUNK_SIZE; i++)
+	{
+		if (voxels[i].id != index)
+		{
+			return false;
+		}
+		else
+		{
+			index = voxels[i].id;
+		}
+	}
+	return true;
 }
 

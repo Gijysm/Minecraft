@@ -100,7 +100,33 @@ bool Chunks::_buildMeshes(VoxelRender* renderer)
 	 {
 		 if(mesh != nullptr)
 			 delete mesh;
-		 //if(chunk->isEmpty())
+		 if (chunk->isEmpty())
+		 {
+			 meshes[index] = nullptr;
+			 return false;
+		 }
+		 chunk->modifier = false;
+		 for (int i = 0; i < 27; i++)
+		 {
+			 closes[i] = nullptr;
+		 }
+		 for (size_t i = 0; i < volume; i++) {
+			 Chunk* other = chunks[i];
+
+			 int ox = other->x - chunk->x;
+			 int oy = other->y - chunk->y;
+			 int oz = other->z - chunk->z;
+
+			 if (abs(ox) > 1 || abs(oy) > 1 || abs(oz) > 1)
+				 continue;
+
+			 ox += 1;
+			 oy += 1;
+			 oz += 1;
+			 closes[(oy * 3 + oz) * 3 + ox] = other;
+		 }
+		 mesh = renderer->render(chunk, (const Chunk**)closes);
+		 meshes[index] = mesh;
 	 }
 }
 

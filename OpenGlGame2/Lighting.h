@@ -21,8 +21,9 @@ class Lighting
 		static void Clear();
 		static int instalize(Chunks* chunks);
 		static void finalize();
-		static void onWorldLoaded();
+		/*static void onWorldLoaded();*/
 		static void onBlockSet(int x, int y, int z, int id);
+		static void onChunkLoaded(int cx, int cy, int cz);
 };
 
 
